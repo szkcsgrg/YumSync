@@ -1,0 +1,154 @@
+// YumSync Color System
+// ====================
+// Only colors that are actually used in the application
+
+:root {
+  // ========================================
+  // BOOTSTRAP SEMANTIC COLORS
+  // ========================================
+  --primary: #007bff;
+  --primary-light: #e3f2fd;
+  --primary-dark: #0056b3;
+  
+  --success: #198754;
+  --success-light: #d1e7dd;
+  --success-dark: #0f5132;
+  
+  --secondary: #6c757d;
+  --secondary-light: #e9ecef;
+  --secondary-dark: #495057;
+  
+  --danger: #dc3545;
+  --danger-light: #f8d7da;
+  --danger-dark: #721c24;
+  
+  // ========================================
+  // BACKGROUND COLORS - Light Theme
+  // ========================================
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --bg-tertiary: #e9ecef;
+  --bg-card: #ffffff;
+  --bg-header: #f8f9fa;
+  --bg-body: #ffffff;
+  
+  // ========================================
+  // TEXT COLORS - Light Theme
+  // ========================================
+  --text-primary: #212529;
+  --text-secondary: #6c757d;
+  --text-muted: #868e96;
+  --text-white: #ffffff;
+  
+  // ========================================
+  // BORDER COLORS - Light Theme
+  // ========================================
+  --border-primary: #dee2e6;
+  --border-secondary: #e9ecef;
+  
+  // ========================================
+  // DRAG & DROP SPECIFIC COLORS
+  // ========================================
+  --drag-bg-over: rgba(0, 123, 255, 0.08);
+  --drag-border: var(--primary);
+  --drag-placeholder: var(--primary);
+  --purchased-bg: rgba(25, 135, 84, 0.08);
+  --purchased-border: rgba(25, 135, 84, 0.25);
+  --just-moved-bg: rgba(0, 123, 255, 0.08);
+  
+  // Drag area backgrounds (subtle in light mode)
+  --drag-area-bg: rgba(248, 249, 250, 0.3);
+  --drag-area-border: rgba(222, 226, 230, 0.4);
+  --drag-area-purchased-bg: rgba(248, 255, 249, 0.2);
+  --drag-area-active-bg: rgba(224, 242, 254, 0.2);
+  --drag-area-purchased-active-bg: rgba(209, 231, 221, 0.2);
+  
+  // ========================================
+  // UTILITY VARIABLES
+  // ========================================
+  --border-radius: 0.375rem;
+  --transition-duration: 0.2s;
+  --transition-ease: ease-in-out;
+  --z-index-dragging: 1000;
+  --z-index-modal: 1050;
+  
+  // Shadows
+  --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  --shadow-md: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+  
+  // Mobile specific
+  --mobile-touch-target: 44px;
+}
+
+// ========================================
+// DARK THEME OVERRIDES
+// ========================================
+[data-theme="dark"] {
+  // Dark Theme Backgrounds
+  --bg-primary: #1a1d23;
+  --bg-secondary: #212529;
+  --bg-tertiary: #2c3034;
+  --bg-card: #212529;
+  --bg-header: #1a1d23;
+  --bg-body: #1a1d23;
+  
+  // Dark Theme Text Colors
+  --text-primary: #ffffff;
+  --text-secondary: #adb5bd;
+  --text-muted: #adb5bd;
+  
+  // Dark Theme Borders
+  --border-primary: #495057;
+  --border-secondary: #3d4449;
+  
+  // Adjusted theme colors for dark mode
+  --primary-light: rgba(0, 123, 255, 0.2);
+  --success-light: rgba(25, 135, 84, 0.2);
+  --danger-light: rgba(220, 53, 69, 0.2);
+  
+  // Dark mode drag and drop
+  --drag-bg-over: rgba(0, 123, 255, 0.15);
+  --purchased-bg: rgba(25, 135, 84, 0.12);
+  --purchased-border: rgba(25, 135, 84, 0.18);
+  --just-moved-bg: rgba(0, 123, 255, 0.15);
+  
+  // Dark mode drag areas (much darker and subtle)
+  --drag-area-bg: rgba(40, 44, 52, 0.4);
+  --drag-area-border: rgba(73, 80, 87, 0.3);
+  --drag-area-purchased-bg: rgba(42, 46, 43, 0.3);
+  --drag-area-active-bg: rgba(30, 58, 82, 0.25);
+  --drag-area-purchased-active-bg: rgba(32, 65, 45, 0.25);
+  
+  // Dark Theme Shadows (more pronounced)
+  --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 0.5rem 1rem rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.5);
+}
+
+// ========================================
+// COLOR MIXINS
+// ========================================
+@mixin theme-transition {
+  transition: background-color var(--transition-duration) var(--transition-ease), 
+              color var(--transition-duration) var(--transition-ease), 
+              border-color var(--transition-duration) var(--transition-ease);
+}
+
+@mixin card-style {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--border-radius);
+  color: var(--text-primary);
+}
+
+@mixin button-primary {
+  background-color: var(--primary);
+  border-color: var(--primary);
+  color: var(--text-white);
+  
+  &:hover {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+  }
+}

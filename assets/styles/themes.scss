@@ -1,0 +1,77 @@
+// YumSync Theme System
+// ====================
+// Theme toggle functionality and related styles
+
+.theme-toggle {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: var(--z-index-modal);
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 2px solid var(--border-primary);
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: var(--font-large);
+  transition: background-color var(--transition-duration) var(--transition-ease), 
+              color var(--transition-duration) var(--transition-ease), 
+              border-color var(--transition-duration) var(--transition-ease);
+  
+  &:hover {
+    background-color: var(--bg-secondary);
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+  
+  // Icon rotation animation
+  .theme-icon {
+    transition: transform 0.3s ease;
+  }
+  
+  &:hover .theme-icon {
+    transform: rotate(20deg);
+  }
+}
+
+// Theme-specific styles for components
+.card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--border-radius);
+  color: var(--text-primary);
+  transition: background-color var(--transition-duration) var(--transition-ease), 
+              color var(--transition-duration) var(--transition-ease), 
+              border-color var(--transition-duration) var(--transition-ease);
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  border-color: var(--primary);
+  color: var(--text-white);
+  font-size: var(--font-base);
+  
+  &:hover {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+  }
+}
+
+// Theme toggle in navigation
+.navbar .theme-toggle {
+  position: static;
+  width: auto;
+  height: auto;
+  border: none;
+  background: transparent;
+  font-size: var(--font-large);
+  
+  &:hover {
+    background: transparent;
+    color: var(--primary);
+  }
+}

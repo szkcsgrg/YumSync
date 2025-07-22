@@ -1,0 +1,2095 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}YumSync Application{% endblock %}
+
+{% block body %}
+
+    {% include 'components/applicationHeader.html.twig' %}
+
+    <div class="container-fluid container-lg mt-4">
+        <div class="row">
+            <div class="col-md-12">
+                <p><strong>Welcome:</strong> {{ name }} ({{ email }})</p>
+
+                <!-- Product Input Section -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Add New Product</h5>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="productInput" placeholder="Enter product name">
+                            <button class="btn btn-primary" type="button" id="addProductButton" data-bs-toggle="modal" data-bs-target="#productModal">
+                                Add Product
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shopping Lists Section - Grouped by Shop -->
+                <div class="row" id="shopListsContainer">
+                    {% if shoppingLists %}
+                        {% for shopList in shoppingLists %}
+                            <div class="col-12 col-lg-6 col-xl-4 mb-4 shop-card-container" 
+                                 data-shop-id="{{ shopList.shop.shopId }}"
+                                 data-shop-name="{{ shopList.shop.name }}">
+                                <div class="card shop-card">
+                                    <!-- Unified Header - Mobile/Desktop -->
+                                    <div class="card-header mobile-header" 
+                                         data-bs-toggle="collapse" 
+                                         data-bs-target="#collapse-{{ shopList.shop.shopId }}" 
+                                         aria-expanded="false" 
+                                         aria-controls="collapse-{{ shopList.shop.shopId }}">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <h5 class="mb-0">
+                                                <i class="fas fa-grip-vertical text-muted me-2 drag-handle d-none d-lg-inline"></i>
+                                                {{ shopList.shop.name }}
+                                                <span class="badge bg-secondary ms-2">{{ shopList.items|length }} items</span>
+                                            </h5>
+                                            <i class="fas fa-chevron-down collapse-icon d-lg-none"></i>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Collapsible Card Body -->
+                                    <div class="collapse d-lg-block" id="collapse-{{ shopList.shop.shopId }}">
+                                        <div class="card-body">
+                                        <!-- Unpurchased Items -->
+                                        {% if shopList.items %}
+                                            <ul class="list-group list-group-flush draggable-list" 
+                                                id="shoppingList-{{ shopList.shop.shopId }}" 
+                                                data-shop-id="{{ shopList.shop.shopId }}"
+                                                data-shop-name="{{ shopList.shop.name }}">
+                                                {% for item in shopList.items %}
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center draggable-item" 
+                                                        data-item-id="{{ item.id }}"
+                                                        data-item-name="{{ item.label }}"
+                                                        data-item-quantity="{{ item.quantity }}"
+                                                        data-item-shop-id="{{ shopList.shop.shopId }}"
+                                                        data-purchased="false"
+                                                        draggable="true">
+                                                        <div class="d-flex align-items-center">
+                                                            <i class="fas fa-grip-vertical d-none d-lg-block text-muted me-2"></i>
+                                                            <span>{{ item.label }}</span>
+                                                        </div>
+                                                        <div>
+                                                            <span class="badge bg-primary rounded-pill me-2">{{ item.quantity }}</span>
+                                                            <button class="btn btn-sm btn-outline-secondary me-1 edit-item-btn" 
+                                                                    data-item-id="{{ item.id }}"
+                                                                    data-item-name="{{ item.label }}"
+                                                                    data-item-quantity="{{ item.quantity }}"
+                                                                    data-item-shop-id="{{ shopList.shop.shopId }}"
+                                                                    data-bs-toggle="modal" 
+                                                                    data-bs-target="#productModal"
+                                                                    title="Edit item">
+                                                                <i class="fas fa-edit"></i>
+                                                            </button>
+                                                            <button class="btn btn-sm btn-success mark-purchased-btn" 
+                                                                    data-item-id="{{ item.id }}" 
+                                                                    title="Mark as purchased">
+                                                                <i class="fas fa-check"></i>
+                                                            </button>
+                                                        </div>
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% else %}
+                                        <!--
+                                            <div class="text-center text-muted py-3 empty-state">
+                                                <i class="fas fa-shopping-cart fa-2x mb-2"></i>
+                                                <p>No items in this shop's list yet.</p>
+                                            </div>
+                                            -->
+                                            <!-- Always visible draggable list for empty shops -->
+                                            <ul class="list-group list-group-flush draggable-list" 
+                                                id="shoppingList-{{ shopList.shop.shopId }}" 
+                                                data-shop-id="{{ shopList.shop.shopId }}"
+                                                data-shop-name="{{ shopList.shop.name }}">
+                                            </ul>
+                                        {% endif %}
+
+                                        <!-- Purchased Items Section - Show when there are items in main list OR purchased items -->
+                                        {% if shopList.items or shopList.purchasedItems %}
+                                            <hr class="my-3">
+                                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                                <h6 class="text-muted mb-0">
+                                                    <i class="fas fa-check-circle me-1"></i>Purchased Items ({{ shopList.purchasedItems|length }})
+                                                </h6>
+                                                {% if shopList.purchasedItems %}
+                                                    <div class="btn-group" role="group">
+                                                        <button class="btn btn-sm btn-outline-success revert-all-btn" 
+                                                                data-shop-id="{{ shopList.shop.shopId }}"
+                                                                title="Move all purchased items back to shopping list">
+                                                            <i class="fas fa-undo me-1"></i>Revert All
+                                                        </button>
+                                                        <button class="btn btn-sm btn-outline-danger delete-purchased-btn" 
+                                                                data-shop-id="{{ shopList.shop.shopId }}"
+                                                                title="Delete all purchased items for this shop">
+                                                            <i class="fas fa-trash me-1"></i>Clear All
+                                                        </button>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                            <ul class="list-group list-group-flush draggable-list" 
+                                                data-shop-id="{{ shopList.shop.shopId }}"
+                                                data-shop-name="{{ shopList.shop.name }}"
+                                                data-purchased-section="true">
+                                                {% for item in shopList.purchasedItems %}
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center text-muted purchased-item-clickable draggable-item" 
+                                                        data-item-id="{{ item.id }}" 
+                                                        data-item-name="{{ item.label }}"
+                                                        data-item-quantity="{{ item.quantity }}"
+                                                        data-item-shop-id="{{ shopList.shop.shopId }}"
+                                                        data-purchased="true"
+                                                        title="Click to mark as unpurchased"
+                                                        draggable="true">
+                                                        <div class="d-flex align-items-center">
+                                                            <i class="fas fa-grip-vertical text-muted me-2"></i>
+                                                            <span>{{ item.label }}</span>
+                                                        </div>
+                                                        <div>
+                                                            <span class="badge bg-secondary rounded-pill">{{ item.quantity }}</span>
+                                                        </div>
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-info-circle fa-2x text-info mb-3"></i>
+                                    <h5>No shops found</h5>
+                                    <p class="text-muted">You need to set up shops first in your initial setup.</p>
+                                    <a href="{{ path('initial_setup') }}" class="btn btn-primary">Go to Setup</a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Modal for Product Details -->
+    <div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="productModalLabel">Add Product to List</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Hidden field to store item ID for editing -->
+                    <input type="hidden" id="editItemId" value="">
+                    
+                    <!-- Product Name Input -->
+                    <div class="mb-3">
+                        <label for="newProductName" class="form-label">Product Name</label>
+                        <input type="text" class="form-control" id="newProductName" placeholder="Enter product name">
+                    </div>
+                    
+                    <!-- Amount Controls -->
+                    <div class="mb-3">
+                        <label class="form-label">Quantity</label>
+                        <div class="input-group" style="max-width: 150px;">
+                            <button class="btn btn-outline-secondary" type="button" id="decreaseAmountButton">-</button>
+                            <input type="text" class="form-control text-center" id="productAmount" value="1">
+                            <button class="btn btn-outline-secondary" type="button" id="increaseAmountButton">+</button>
+                        </div>
+                    </div>
+
+                    <!-- Shop Selection -->
+                    <div class="mb-3">
+                        <label for="shopSelect" class="form-label">Choose Shop</label>
+                        <select class="form-select" id="shopSelect">
+                            <option value="">Select a shop...</option>
+                            {% for shop in userShops %}
+                                <option value="{{ shop.shopId }}">{{ shop.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="me-auto">
+                        <button type="button" class="btn btn-danger d-none" id="deleteProductButton">
+                            <i class="fas fa-trash me-1"></i>Delete Product
+                        </button>
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="assignProductButton">
+                            <span id="addButtonText">Add to List</span>
+                            <span id="addButtonSpinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% include 'components/footer.html.twig' %}
+    
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        // JavaScript for handling modal interactions and API calls
+        document.addEventListener('DOMContentLoaded', function() {
+            const productInput = document.getElementById('productInput');
+            const newProductName = document.getElementById('newProductName');
+            const productAmount = document.getElementById('productAmount');
+            const decreaseBtn = document.getElementById('decreaseAmountButton');
+            const increaseBtn = document.getElementById('increaseAmountButton');
+            const addProductBtn = document.getElementById('addProductButton');
+            const assignProductBtn = document.getElementById('assignProductButton');
+            const shopSelect = document.getElementById('shopSelect');
+            const addButtonText = document.getElementById('addButtonText');
+            const addButtonSpinner = document.getElementById('addButtonSpinner');
+            const editItemId = document.getElementById('editItemId');
+            const modalTitle = document.getElementById('productModalLabel');
+            const deleteProductBtn = document.getElementById('deleteProductButton');
+
+            let isEditMode = false;
+
+            // =========================
+            // MOBILE COLLAPSE STATE MANAGEMENT
+            // =========================
+            
+            // Function to save which shop lists are currently open
+            function saveCollapseState() {
+                const openShops = [];
+                document.querySelectorAll('.collapse.show').forEach(collapse => {
+                    const shopId = collapse.id.replace('collapse-', '');
+                    openShops.push(shopId);
+                });
+                localStorage.setItem('yumsync_open_shops', JSON.stringify(openShops));
+                console.log('Saved open shops:', openShops);
+            }
+
+            // Function to restore previously opened shop lists
+            function restoreCollapseState() {
+                const savedShops = localStorage.getItem('yumsync_open_shops');
+                let openShops = [];
+                
+                if (savedShops) {
+                    try {
+                        openShops = JSON.parse(savedShops);
+                        console.log('Found saved open shops:', openShops);
+                    } catch (error) {
+                        console.error('Error parsing saved collapse state:', error);
+                        localStorage.removeItem('yumsync_open_shops');
+                    }
+                }
+                
+                // Auto-open shops with items on mobile devices
+                if (window.innerWidth <= 991.98) {
+                    console.log('Mobile device detected, auto-opening shops with items');
+                    
+                    // Find all shops that have items (either unpurchased or purchased)
+                    document.querySelectorAll('.shop-card-container').forEach(shopCard => {
+                        const shopId = shopCard.dataset.shopId;
+                        const collapseElement = document.getElementById(`collapse-${shopId}`);
+                        const unpurchasedItems = shopCard.querySelectorAll('.draggable-item[data-purchased="false"]');
+                        const purchasedItems = shopCard.querySelectorAll('.draggable-item[data-purchased="true"]');
+                        const hasItems = unpurchasedItems.length > 0 || purchasedItems.length > 0;
+                        
+                        if (hasItems && !openShops.includes(shopId)) {
+                            openShops.push(shopId);
+                            console.log(`Auto-opening shop ${shopId} (${unpurchasedItems.length} unpurchased, ${purchasedItems.length} purchased items)`);
+                        }
+                    });
+                }
+                
+                // Apply the open state to all shops in the openShops array
+                const originalSavedShops = savedShops ? JSON.parse(savedShops) : [];
+                
+                openShops.forEach(shopId => {
+                    const collapseElement = document.getElementById(`collapse-${shopId}`);
+                    const headerElement = document.querySelector(`[data-bs-target="#collapse-${shopId}"]`);
+                    
+                    if (collapseElement && headerElement) {
+                        // Add Bootstrap classes to show the collapse
+                        collapseElement.classList.add('show');
+                        
+                        // Update aria-expanded attribute
+                        headerElement.setAttribute('aria-expanded', 'true');
+                        
+                        // Rotate the chevron icon
+                        const icon = headerElement.querySelector('.collapse-icon');
+                        if (icon) {
+                            icon.classList.add('rotated');
+                        }
+                        
+                        // Add visual feedback based on how the list was opened
+                        if (originalSavedShops.includes(shopId)) {
+                            // This was a saved/restored list
+                            headerElement.classList.add('restored');
+                            setTimeout(() => {
+                                headerElement.classList.remove('restored');
+                            }, 2000);
+                        } else {
+                            // This was auto-opened because it has items
+                            headerElement.classList.add('auto-opened');
+                            collapseElement.classList.add('auto-opening');
+                            setTimeout(() => {
+                                headerElement.classList.remove('auto-opened');
+                                collapseElement.classList.remove('auto-opening');
+                            }, 3000);
+                        }
+                        
+                        console.log(`Opened shop ${shopId}`);
+                    }
+                });
+                
+                // Show notification based on what was opened (only on initial page load)
+                const isInitialLoad = !sessionStorage.getItem('yumsync_page_loaded');
+                
+                if (isInitialLoad) {
+                    const savedCount = savedShops ? JSON.parse(savedShops).length : 0;
+                    const autoOpenedCount = openShops.length - savedCount;
+                    
+                    if (savedCount > 0 && autoOpenedCount > 0) {
+                        showAlert(`Restored ${savedCount} saved list${savedCount > 1 ? 's' : ''} and auto-opened ${autoOpenedCount} list${autoOpenedCount > 1 ? 's' : ''} with items`, 'info', 3000);
+                    } else if (savedCount > 0) {
+                        showAlert(`Restored ${savedCount} open shop list${savedCount > 1 ? 's' : ''}`, 'info', 2000);
+                    } else if (autoOpenedCount > 0) {
+                        showAlert(`Auto-opened ${autoOpenedCount} list${autoOpenedCount > 1 ? 's' : ''} with items`, 'info', 2000);
+                    }
+                    
+                    // Mark that the page has been loaded
+                    sessionStorage.setItem('yumsync_page_loaded', 'true');
+                }
+                
+                // Update localStorage with the new state (including auto-opened shops)
+                if (openShops.length > 0) {
+                    localStorage.setItem('yumsync_open_shops', JSON.stringify(openShops));
+                }
+            }
+
+            // Function to save state before page reload
+            function saveStateBeforeReload() {
+                saveCollapseState();
+            }
+
+            // Function to clear saved state (useful for manual refresh)
+            function clearSavedState() {
+                localStorage.removeItem('yumsync_open_shops');
+                sessionStorage.removeItem('yumsync_page_loaded'); // Also clear the page loaded flag
+                console.log('Cleared saved collapse state and page loaded flag');
+            }
+
+            // Listen for keyboard shortcuts to clear state
+            document.addEventListener('keydown', function(e) {
+                // Ctrl+Shift+R or Cmd+Shift+R to clear state and refresh
+                if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'R') {
+                    clearSavedState();
+                }
+            });
+
+            // Handle window resize events (for device rotation or screen size changes)
+            let resizeTimeout;
+            window.addEventListener('resize', function() {
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(function() {
+                    console.log('Window resized, checking if mobile behavior should apply');
+                    
+                    // If we switched to mobile view, auto-open shops with items
+                    if (window.innerWidth <= 991.98) {
+                        const currentlyOpen = [];
+                        document.querySelectorAll('.collapse.show').forEach(collapse => {
+                            const shopId = collapse.id.replace('collapse-', '');
+                            currentlyOpen.push(shopId);
+                        });
+                        
+                        // Check if there are shops with items that aren't open
+                        let newlyOpened = 0;
+                        document.querySelectorAll('.shop-card-container').forEach(shopCard => {
+                            const shopId = shopCard.dataset.shopId;
+                            if (!currentlyOpen.includes(shopId)) {
+                                const unpurchasedItems = shopCard.querySelectorAll('.draggable-item[data-purchased="false"]');
+                                const purchasedItems = shopCard.querySelectorAll('.draggable-item[data-purchased="true"]');
+                                const hasItems = unpurchasedItems.length > 0 || purchasedItems.length > 0;
+                                
+                                if (hasItems) {
+                                    const collapseElement = document.getElementById(`collapse-${shopId}`);
+                                    const headerElement = document.querySelector(`[data-bs-target="#collapse-${shopId}"]`);
+                                    
+                                    if (collapseElement && headerElement) {
+                                        collapseElement.classList.add('show');
+                                        headerElement.setAttribute('aria-expanded', 'true');
+                                        
+                                        const icon = headerElement.querySelector('.collapse-icon');
+                                        if (icon) {
+                                            icon.classList.add('rotated');
+                                        }
+                                        
+                                        newlyOpened++;
+                                        console.log(`Auto-opened shop ${shopId} after resize`);
+                                    }
+                                }
+                            }
+                        });
+                        
+                        if (newlyOpened > 0) {
+                            showAlert(`Auto-opened ${newlyOpened} list${newlyOpened > 1 ? 's' : ''} with items`, 'info', 2000);
+                            saveCollapseState(); // Save the new state
+                        }
+                    }
+                }, 300); // Debounce resize events
+            });
+
+            // Listen for collapse events to save state in real-time
+            document.addEventListener('shown.bs.collapse', function(e) {
+                console.log('Collapse shown:', e.target.id);
+                saveCollapseState();
+            });
+
+            document.addEventListener('hidden.bs.collapse', function(e) {
+                console.log('Collapse hidden:', e.target.id);
+                saveCollapseState();
+            });
+
+            // Also listen for manual chevron clicks to update icons
+            document.addEventListener('click', function(e) {
+                const mobileHeader = e.target.closest('.mobile-header');
+                if (mobileHeader) {
+                    const icon = mobileHeader.querySelector('.collapse-icon');
+                    if (icon) {
+                        // Toggle the rotation class
+                        setTimeout(() => {
+                            const targetCollapse = document.querySelector(mobileHeader.getAttribute('data-bs-target'));
+                            if (targetCollapse) {
+                                if (targetCollapse.classList.contains('show')) {
+                                    icon.classList.add('rotated');
+                                } else {
+                                    icon.classList.remove('rotated');
+                                }
+                            }
+                        }, 100);
+                    }
+                }
+            });
+
+            // Restore state when page loads
+            restoreCollapseState();
+
+            // When "Add Product" button is clicked, copy the input value to modal
+            addProductBtn.addEventListener('click', function() {
+                // Set to add mode
+                isEditMode = false;
+                editItemId.value = '';
+                modalTitle.textContent = 'Add Product to List';
+                addButtonText.textContent = 'Add to List';
+                
+                // Hide delete button in add mode
+                deleteProductBtn.classList.add('d-none');
+
+                const productName = productInput.value.trim();
+                if (productName) {
+                    newProductName.value = productName;
+                } else {
+                    newProductName.value = '';
+                }
+                // Reset form
+                productAmount.value = 1;
+                shopSelect.value = '';
+            });
+
+            // Decrease amount
+            decreaseBtn.addEventListener('click', function() {
+                let amount = parseInt(productAmount.value);
+                if (amount > 1) {
+                    productAmount.value = amount - 1;
+                }
+            });
+
+            // Increase amount
+            increaseBtn.addEventListener('click', function() {
+                let amount = parseInt(productAmount.value);
+                productAmount.value = amount + 1;
+            });
+
+            // Handle edit item buttons
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('.edit-item-btn')) {
+                    const button = e.target.closest('.edit-item-btn');
+                    
+                    // Set to edit mode
+                    isEditMode = true;
+                    editItemId.value = button.dataset.itemId;
+                    modalTitle.textContent = 'Edit Product';
+                    addButtonText.textContent = 'Update Product';
+                    
+                    // Show delete button in edit mode
+                    deleteProductBtn.classList.remove('d-none');
+
+                    // Populate form with existing data
+                    newProductName.value = button.dataset.itemName;
+                    productAmount.value = button.dataset.itemQuantity;
+                    shopSelect.value = button.dataset.itemShopId;
+
+                    // Clear the main input since we're editing from the modal
+                    productInput.value = '';
+                }
+            });
+
+            // Assign product to list - API call (handles both add and edit)
+            assignProductBtn.addEventListener('click', async function() {
+                const productName = newProductName.value.trim();
+                const amount = parseInt(productAmount.value);
+                const selectedShopId = parseInt(shopSelect.value);
+                const itemId = editItemId.value;
+
+                // Validation
+                if (!productName) {
+                    showAlert('Please enter a product name', 'warning');
+                    return;
+                }
+
+                if (!selectedShopId) {
+                    showAlert('Please select a shop', 'warning');
+                    return;
+                }
+
+                // Show loading state
+                setLoadingState(true);
+
+                try {
+                    let response, result;
+
+                    if (isEditMode && itemId) {
+                        // Edit existing product
+                        response = await fetch(`/api/edit-product/${itemId}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                productName: productName,
+                                quantity: amount,
+                                shopId: selectedShopId
+                            })
+                        });
+                    } else {
+                        // Add new product
+                        response = await fetch('/api/add-product', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                productName: productName,
+                                quantity: amount,
+                                shopId: selectedShopId
+                            })
+                        });
+                    }
+
+                    result = await response.json();
+
+                    console.log('API response:', result);
+
+                    if (response.ok && result.success) {
+                        if (isEditMode && itemId) {
+                            console.log('Editing item:', itemId, 'with data:', result.listItem);
+                            // Update existing item in UI
+                            updateItemInUI(itemId, result.listItem);
+                            showAlert(result.message, 'success');
+                        } else {
+                            console.log('Adding new item with data:', result.listItem);
+                            console.log('Selected shop ID:', selectedShopId);
+                            console.log('API returned shop ID:', result.listItem.shopId);
+                            console.log('API returned shop name:', result.listItem.shopName);
+                            
+                            // Add new item to the UI
+                            addItemToShopList(selectedShopId, result.listItem);
+                            
+                            // Verify the item was actually added to the DOM
+                            setTimeout(() => {
+                                const addedItem = document.querySelector(`[data-item-id="${result.listItem.id}"]`);
+                                if (!addedItem) {
+                                    console.warn('Item was not found in DOM after add attempt, refreshing page...');
+                                    showAlert('Item added successfully! Refreshing to show changes...', 'info');
+                                    location.reload();
+                                } else {
+                                    console.log('Item successfully added and found in DOM');
+                                    showAlert(result.message, 'success');
+                                }
+                            }, 500);
+                        }
+
+                        // Clear inputs
+                        productInput.value = '';
+                        newProductName.value = '';
+                        productAmount.value = 1;
+                        shopSelect.value = '';
+                        editItemId.value = '';
+                        isEditMode = false;
+
+                        // Reset modal title and button text
+                        modalTitle.textContent = 'Add Product to List';
+                        addButtonText.textContent = 'Add to List';
+                        
+                        // Hide delete button
+                        deleteProductBtn.classList.add('d-none');
+
+                        // Close modal
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('productModal'));
+                        modal.hide();
+                    } else {
+                        showAlert(result.error || 'Failed to save product', 'danger');
+                    }
+                } catch (error) {
+                    console.error('Error saving product:', error);
+                    showAlert('Network error. Please try again.', 'danger');
+                } finally {
+                    setLoadingState(false);
+                }
+            });
+
+            // Handle delete product button in modal
+            deleteProductBtn.addEventListener('click', async function() {
+                const itemId = editItemId.value;
+                const productName = newProductName.value.trim();
+                
+                if (!itemId) {
+                    showAlert('No product selected for deletion', 'warning');
+                    return;
+                }
+                
+                if (confirm(`Are you sure you want to delete "${productName}"?`)) {
+                    try {
+                        const response = await fetch(`/api/remove-product/${itemId}`, {
+                            method: 'DELETE'
+                        });
+
+                        const result = await response.json();
+                        
+                        console.log('Delete product API response:', result);
+
+                        if (response.ok && result.success) {
+                            // Clear form and close modal
+                            productInput.value = '';
+                            newProductName.value = '';
+                            productAmount.value = 1;
+                            shopSelect.value = '';
+                            editItemId.value = '';
+                            isEditMode = false;
+                            
+                            // Reset modal
+                            modalTitle.textContent = 'Add Product to List';
+                            addButtonText.textContent = 'Add to List';
+                            deleteProductBtn.classList.add('d-none');
+                            
+                            // Close modal
+                            const modal = bootstrap.Modal.getInstance(document.getElementById('productModal'));
+                            modal.hide();
+                            
+                            // Remove item from UI
+                            const listItem = document.querySelector(`[data-item-id="${itemId}"]`);
+                            if (listItem) {
+                                // Get the shop list before removing the item
+                                const shopList = listItem.closest('.draggable-list');
+                                const shopId = listItem.dataset.itemShopId;
+                                
+                                listItem.remove();
+                                console.log('Item removed from DOM via modal delete');
+                                
+                                // Update shop item count
+                                updateShopItemCount();
+                            }
+                            
+                            showAlert(result.message, 'success');
+                        } else {
+                            showAlert(result.error || 'Failed to delete product', 'danger');
+                        }
+                    } catch (error) {
+                        console.error('Error deleting product:', error);
+                        showAlert('Network error. Please try again.', 'danger');
+                    }
+                }
+            });
+
+            // Handle remove item buttons
+            document.addEventListener('click', async function(e) {
+                if (e.target.closest('.remove-item-btn')) {
+                    const button = e.target.closest('.remove-item-btn');
+                    const itemId = button.dataset.itemId;
+                    
+                    console.log('Attempting to delete item with ID:', itemId);
+                    
+                    if (confirm('Are you sure you want to permanently remove this item?')) {
+                        try {
+                            const response = await fetch(`/api/remove-product/${itemId}`, {
+                                method: 'DELETE'
+                            });
+
+                            const result = await response.json();
+                            
+                            console.log('Delete API response:', result);
+
+                            if (response.ok && result.success) {
+                                // Find and remove item from UI
+                                const listItem = document.querySelector(`[data-item-id="${itemId}"]`);
+                                
+                                console.log('Found list item to remove:', listItem);
+                                
+                                if (listItem) {
+                                    // Get the shop list before removing the item
+                                    const shopList = listItem.closest('.draggable-list');
+                                    const shopId = listItem.dataset.itemShopId;
+                                    
+                                    listItem.remove();
+                                    console.log('Item removed from DOM');
+                                    
+                                    // Check if this was the last item in the main list
+                                    if (shopList && !shopList.dataset.purchasedSection) {
+                                        const remainingItems = shopList.querySelectorAll('.draggable-item').length;
+                                        console.log('Remaining items in shop list:', remainingItems);
+                                        
+                                        if (remainingItems === 0) {
+                                            // This was the last item in main list, check if we should hide purchased section
+                                            // Only hide if there are also no purchased items
+                                            if (!shouldShowPurchasedSection(shopId)) {
+                                                // No items in main list AND no purchased items, hide the purchased section
+                                                hidePurchasedSectionForShop(shopId);
+                                            }
+                                        }
+                                    }
+                                    
+                                    // Update shop item count (this will also handle empty state)
+                                    updateShopItemCount();
+                                    
+                                    showAlert(result.message, 'success');
+                                } else {
+                                    console.error('Could not find list item with ID:', itemId);
+                                    showAlert('Item removed from database but UI update failed. Please refresh.', 'warning');
+                                }
+                            } else {
+                                showAlert(result.error || 'Failed to remove product', 'danger');
+                            }
+                        } catch (error) {
+                            console.error('Error removing product:', error);
+                            showAlert('Network error. Please try again.', 'danger');
+                        }
+                    }
+                }
+            });
+
+            // Handle mark as purchased buttons
+            document.addEventListener('click', async function(e) {
+                if (e.target.closest('.mark-purchased-btn')) {
+                    const button = e.target.closest('.mark-purchased-btn');
+                    const itemId = button.dataset.itemId;
+                    
+                    console.log('Attempting to mark item as purchased with ID:', itemId);
+                    
+                    try {
+                        const response = await fetch(`/api/mark-purchased/${itemId}`, {
+                            method: 'PUT'
+                        });
+
+                        const result = await response.json();
+                        
+                        console.log('Mark purchased API response:', result);
+
+                        if (response.ok && result.success) {
+                            showAlert(result.message, 'success');
+                            // Reload the page to reflect changes
+                            window.location.reload();
+                        } else {
+                            showAlert(result.error || 'Failed to mark item as purchased', 'danger');
+                        }
+                    } catch (error) {
+                        console.error('Error marking item as purchased:', error);
+                        showAlert('Network error. Please try again.', 'danger');
+                    }
+                }
+            });
+
+            // Handle clicking on purchased items to unmark them
+            document.addEventListener('click', async function(e) {
+                if (e.target.closest('.purchased-item-clickable')) {
+                    const listItem = e.target.closest('.purchased-item-clickable');
+                    const itemId = listItem.dataset.itemId;
+                    
+                    console.log('Attempting to unmark item as purchased with ID:', itemId);
+                    
+                    try {
+                        const response = await fetch(`/api/unmark-purchased/${itemId}`, {
+                            method: 'PUT'
+                        });
+
+                        const result = await response.json();
+                        
+                        console.log('Unmark purchased API response:', result);
+
+                        if (response.ok && result.success) {
+                            showAlert(result.message, 'success');
+                            // Reload the page to reflect changes
+                            window.location.reload();
+                        } else {
+                            showAlert(result.error || 'Failed to unmark item as purchased', 'danger');
+                        }
+                    } catch (error) {
+                        console.error('Error unmarking item as purchased:', error);
+                        showAlert('Network error. Please try again.', 'danger');
+                    }
+                }
+            });
+
+            // Handle delete all purchased items buttons
+            document.addEventListener('click', async function(e) {
+                if (e.target.closest('.delete-purchased-btn')) {
+                    const button = e.target.closest('.delete-purchased-btn');
+                    const shopId = button.dataset.shopId;
+                    
+                    console.log('Attempting to delete all purchased items for shop ID:', shopId);
+                    
+                    if (confirm('Are you sure you want to permanently delete all purchased items for this shop?')) {
+                        try {
+                            const response = await fetch(`/api/delete-purchased-items/${shopId}`, {
+                                method: 'DELETE'
+                            });
+
+                            const result = await response.json();
+                            
+                            console.log('Delete purchased items API response:', result);
+
+                            if (response.ok && result.success) {
+                                // Save collapse state before reload
+                                saveStateBeforeReload();
+                                
+                                // Simply refresh the page to show the updated state
+                                showAlert(result.message, 'success');
+                                setTimeout(() => {
+                                    window.location.reload();
+                                }, 1000);
+                            } else {
+                                showAlert(result.error || 'Failed to delete purchased items', 'danger');
+                            }
+                        } catch (error) {
+                            console.error('Error deleting purchased items:', error);
+                            showAlert('Network error. Please try again.', 'danger');
+                        }
+                    }
+                }
+            });
+
+            // Handle revert all purchased items buttons
+            document.addEventListener('click', async function(e) {
+                if (e.target.closest('.revert-all-btn')) {
+                    const button = e.target.closest('.revert-all-btn');
+                    const shopId = button.dataset.shopId;
+                    
+                    console.log('Attempting to revert all purchased items for shop ID:', shopId);
+                    
+                    if (confirm('Are you sure you want to move all purchased items back to the shopping list?')) {
+                        try {
+                            const response = await fetch(`/api/revert-purchased-items/${shopId}`, {
+                                method: 'PUT'
+                            });
+
+                            const result = await response.json();
+                            
+                            console.log('Revert purchased items API response:', result);
+
+                            if (response.ok && result.success) {
+                                // Save collapse state before reload
+                                saveStateBeforeReload();
+                                
+                                // Simply refresh the page to show the updated state
+                                showAlert(result.message, 'success');
+                                setTimeout(() => {
+                                    window.location.reload();
+                                }, 1000);
+                            } else {
+                                showAlert(result.error || 'Failed to revert purchased items', 'danger');
+                            }
+                        } catch (error) {
+                            console.error('Error reverting purchased items:', error);
+                            showAlert('Network error. Please try again.', 'danger');
+                        }
+                    }
+                }
+            });
+
+            // =========================
+            // DRAG AND DROP FUNCTIONALITY
+            // =========================
+            
+            let draggedElement = null;
+            let draggedElementData = null;
+            let touchStartY = 0;
+            let touchStartX = 0;
+            let isDragging = false;
+            let placeholder = null;
+
+            // Initialize drag and drop
+            function initializeDragAndDrop() {
+                // Check if we're on mobile (touch device)
+                const isMobile = window.innerWidth <= 991.98;
+                
+                // Add event listeners to all draggable items
+                document.querySelectorAll('.draggable-item').forEach(item => {
+                    if (!isMobile) {
+                        // Desktop drag events only
+                        item.addEventListener('dragstart', handleDragStart);
+                        item.addEventListener('dragend', handleDragEnd);
+                        
+                        // Ensure draggable attribute is set on desktop
+                        item.setAttribute('draggable', 'true');
+                    } else {
+                        // On mobile, disable drag completely
+                        item.setAttribute('draggable', 'false');
+                        item.removeAttribute('draggable');
+                    }
+                });
+
+                if (!isMobile) {
+                    // Add event listeners to all drop zones (including empty lists) - desktop only
+                    document.querySelectorAll('.draggable-list').forEach(zone => {
+                        zone.addEventListener('dragover', handleDragOver);
+                        zone.addEventListener('drop', handleDrop);
+                        zone.addEventListener('dragenter', handleDragEnter);
+                        zone.addEventListener('dragleave', handleDragLeave);
+                    });
+                    
+                    // Also add listeners to card bodies for empty shops - desktop only
+                    document.querySelectorAll('.card-body').forEach(zone => {
+                        zone.addEventListener('dragover', handleDragOver);
+                        zone.addEventListener('drop', handleDrop);
+                        zone.addEventListener('dragenter', handleDragEnter);
+                        zone.addEventListener('dragleave', handleDragLeave);
+                    });
+                }
+            }
+
+            // Desktop Drag Events
+            function handleDragStart(e) {
+                // Prevent this drag event from propagating to parent shop card
+                e.stopPropagation();
+                
+                // Ensure the parent shop card is not draggable when dragging list items
+                const shopCard = e.target.closest('.shop-card-container');
+                if (shopCard) {
+                    shopCard.setAttribute('draggable', 'false');
+                    shopCard.classList.remove('header-dragging');
+                }
+                
+                draggedElement = e.target;
+                draggedElementData = {
+                    itemId: draggedElement.dataset.itemId,
+                    itemName: draggedElement.dataset.itemName,
+                    itemQuantity: draggedElement.dataset.itemQuantity,
+                    currentShopId: draggedElement.dataset.itemShopId,
+                    isPurchased: draggedElement.dataset.purchased === 'true'
+                };
+                
+                draggedElement.classList.add('dragging');
+                document.body.classList.add('dragging-active');
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/html', e.target.outerHTML);
+                
+                console.log('Drag started:', draggedElementData);
+            }
+
+            function handleDragEnd(e) {
+                e.target.classList.remove('dragging');
+                document.body.classList.remove('dragging-active');
+                clearAllDragStyles();
+                draggedElement = null;
+                draggedElementData = null;
+            }
+
+            function handleDragEnter(e) {
+                e.preventDefault();
+                
+                // Handle drop zones
+                const list = e.target.closest('.draggable-list');
+                const cardBody = e.target.closest('.card-body');
+                
+                if (list) {
+                    list.classList.add('drag-over');
+                } else if (cardBody && !cardBody.querySelector('.draggable-list')) {
+                    // This is an empty card body, highlight the card
+                    const card = cardBody.closest('.card');
+                    if (card) {
+                        card.classList.add('drag-target');
+                    }
+                }
+            }
+
+            function handleDragLeave(e) {
+                // Only remove highlight if we're actually leaving the element
+                if (!e.currentTarget.contains(e.relatedTarget)) {
+                    if (e.target.classList.contains('draggable-list')) {
+                        e.target.classList.remove('drag-over');
+                    }
+                    
+                    const card = e.target.closest('.card');
+                    if (card) {
+                        card.classList.remove('drag-target');
+                    }
+                }
+            }
+
+            function handleDragOver(e) {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                
+                const list = e.target.closest('.draggable-list');
+                const cardBody = e.target.closest('.card-body');
+                
+                if (list) {
+                    // Clear any existing placeholders
+                    removePlaceholder();
+                    
+                    // Add placeholder to show where the item will be dropped
+                    const afterElement = getDragAfterElement(list, e.clientY);
+                    if (afterElement == null) {
+                        list.appendChild(createPlaceholder());
+                    } else {
+                        list.insertBefore(createPlaceholder(), afterElement);
+                    }
+                } else if (cardBody && !cardBody.querySelector('.draggable-list')) {
+                    // This is an empty card, we can drop here
+                    const card = cardBody.closest('.card');
+                    if (card) {
+                        card.classList.add('drag-target');
+                    }
+                }
+            }
+
+            function handleDrop(e) {
+                e.preventDefault();
+                
+                let dropZone = e.target.closest('.draggable-list');
+                let targetShopId = null;
+                let isPurchasedSection = false;
+                let insertPosition = null;
+                
+                if (dropZone) {
+                    // Dropped on an existing list
+                    targetShopId = dropZone.dataset.shopId;
+                    isPurchasedSection = dropZone.dataset.purchasedSection === 'true';
+                    
+                    // Check if we need to handle reordering within the same list
+                    if (parseInt(targetShopId) === parseInt(draggedElementData.currentShopId) && 
+                        isPurchasedSection === draggedElementData.isPurchased) {
+                        
+                        // This is a reorder within the same list
+                        console.log('Reordering within same list');
+                        
+                        // Find where to insert based on the placeholder position
+                        const placeholder = dropZone.querySelector('.drag-placeholder');
+                        if (placeholder) {
+                            // Get all items in the list (excluding the dragged item and placeholder)
+                            const allItems = [...dropZone.querySelectorAll('.draggable-item:not(.dragging)')];
+                            insertPosition = allItems.findIndex(item => item.nextSibling === placeholder);
+                            if (insertPosition === -1) {
+                                insertPosition = allItems.length; // Insert at end
+                            }
+                            console.log('Insert position:', insertPosition);
+                            
+                            // Perform the reorder in the UI immediately
+                            handleReorderInSameList(draggedElement, dropZone, placeholder);
+                        }
+                        
+                        clearAllDragStyles();
+                        removePlaceholder();
+                        return; // Don't proceed with API calls for same-list reordering
+                    }
+                } else {
+                    // Check if dropped on empty card body
+                    const cardBody = e.target.closest('.card-body');
+                    if (cardBody) {
+                        const card = cardBody.closest('.card');
+                        const shopHeader = card?.querySelector('.card-header h5');
+                        
+                        if (shopHeader) {
+                            // Extract shop ID from existing lists in other cards or find by shop name
+                            const allShopCards = document.querySelectorAll('.card');
+                            for (const shopCard of allShopCards) {
+                                if (shopCard === card) {
+                                    // Find shop ID from header or existing list
+                                    const existingList = shopCard.querySelector('[data-shop-id]');
+                                    if (existingList) {
+                                        targetShopId = existingList.dataset.shopId;
+                                        break;
+                                    } else {
+                                        // This is an empty card, we need to get shop ID from other cards with same name
+                                        const headerText = shopHeader.textContent.replace(/^\s*[^\w]*\s*/, '').trim();
+                                        for (const otherCard of allShopCards) {
+                                            const otherList = otherCard.querySelector('[data-shop-id]');
+                                            const otherHeader = otherCard.querySelector('.card-header h5');
+                                            if (otherList && otherHeader) {
+                                                const otherHeaderText = otherHeader.textContent.replace(/^\s*[^\w]*\s*/, '').trim();
+                                                if (otherHeaderText === headerText) {
+                                                    targetShopId = otherList.dataset.shopId;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                if (targetShopId && draggedElement && draggedElementData) {
+                    console.log('Drop event:', {
+                        targetShopId,
+                        isPurchasedSection,
+                        draggedData: draggedElementData
+                    });
+                    
+                    // Handle the drop (shop or purchase status change)
+                    handleItemMove(
+                        draggedElementData.itemId,
+                        targetShopId,
+                        isPurchasedSection
+                    );
+                } else {
+                    console.log('Drop failed - no valid target found');
+                }
+                
+                clearAllDragStyles();
+                removePlaceholder();
+            }
+
+            // Touch Events for Mobile
+            function handleTouchStart(e) {
+                if (e.target.closest('.btn') || e.target.closest('button')) return; // Don't drag buttons
+                
+                const touch = e.touches[0];
+                touchStartY = touch.clientY;
+                touchStartX = touch.clientX;
+                isDragging = false;
+                
+                setTimeout(() => {
+                    if (!isDragging) {
+                        draggedElement = e.target.closest('.draggable-item');
+                        if (draggedElement) {
+                            draggedElementData = {
+                                itemId: draggedElement.dataset.itemId,
+                                itemName: draggedElement.dataset.itemName,
+                                itemQuantity: draggedElement.dataset.itemQuantity,
+                                currentShopId: draggedElement.dataset.itemShopId,
+                                isPurchased: draggedElement.dataset.purchased === 'true'
+                            };
+                            draggedElement.classList.add('dragging');
+                            document.body.classList.add('dragging-active');
+                            isDragging = true;
+                            console.log('Touch drag started:', draggedElementData);
+                        }
+                    }
+                }, 200);
+            }
+
+            function handleTouchMove(e) {
+                if (!isDragging || !draggedElement) return;
+                
+                e.preventDefault();
+                const touch = e.touches[0];
+                const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+                
+                // Clear previous highlights
+                clearAllDragStyles();
+                
+                // Find drop zone
+                const dropList = elementBelow?.closest('.draggable-list');
+                const cardBody = elementBelow?.closest('.card-body');
+                
+                if (dropList) {
+                    dropList.classList.add('drag-over');
+                } else if (cardBody && !cardBody.querySelector('.draggable-list')) {
+                    const card = cardBody.closest('.card');
+                    if (card) {
+                        card.classList.add('drag-target');
+                    }
+                }
+            }
+
+            function handleTouchEnd(e) {
+                if (!isDragging || !draggedElement) return;
+                
+                const touch = e.changedTouches[0];
+                const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+                
+                let targetShopId = null;
+                let isPurchasedSection = false;
+                
+                // Find drop target
+                const dropList = elementBelow?.closest('.draggable-list');
+                if (dropList) {
+                    targetShopId = dropList.dataset.shopId;
+                    isPurchasedSection = dropList.dataset.purchasedSection === 'true';
+                    
+                    // Check if this is a reorder within the same list
+                    if (parseInt(targetShopId) === parseInt(draggedElementData.currentShopId) && 
+                        isPurchasedSection === draggedElementData.isPurchased) {
+                        
+                        console.log('Touch reordering within same list');
+                        
+                        // For touch, we'll insert based on the touch position
+                        const dropListRect = dropList.getBoundingClientRect();
+                        const touchY = touch.clientY - dropListRect.top;
+                        
+                        // Find the best insertion point
+                        const allItems = [...dropList.querySelectorAll('.draggable-item:not(.dragging)')];
+                        let insertBefore = null;
+                        
+                        for (const item of allItems) {
+                            const itemRect = item.getBoundingClientRect();
+                            const itemY = itemRect.top - dropListRect.top + itemRect.height / 2;
+                            if (touchY < itemY) {
+                                insertBefore = item;
+                                break;
+                            }
+                        }
+                        
+                        // Perform the reorder
+                        if (insertBefore) {
+                            dropList.insertBefore(draggedElement, insertBefore);
+                        } else {
+                            dropList.appendChild(draggedElement);
+                        }
+                        
+                        // Show visual feedback with CSS class
+                        draggedElement.classList.add('just-moved');
+                        
+                        setTimeout(() => {
+                            draggedElement.classList.remove('just-moved');
+                        }, 600);
+                        
+                        // Reset states and return early
+                        clearAllDragStyles();
+                        document.body.classList.remove('dragging-active');
+                        if (draggedElement) {
+                            draggedElement.classList.remove('dragging');
+                        }
+                        draggedElement = null;
+                        draggedElementData = null;
+                        isDragging = false;
+                        return;
+                    }
+                } else {
+                    const cardBody = elementBelow?.closest('.card-body');
+                    if (cardBody) {
+                        const card = cardBody.closest('.card');
+                        const existingList = card?.querySelector('[data-shop-id]');
+                        if (existingList) {
+                            targetShopId = existingList.dataset.shopId;
+                        }
+                    }
+                }
+                
+                if (targetShopId && draggedElementData) {
+                    console.log('Touch drop event:', {
+                        targetShopId,
+                        isPurchasedSection,
+                        draggedData: draggedElementData
+                    });
+                    
+                    // Handle the drop
+                    handleItemMove(
+                        draggedElementData.itemId,
+                        targetShopId,
+                        isPurchasedSection
+                    );
+                }
+                
+                // Reset states
+                clearAllDragStyles();
+                document.body.classList.remove('dragging-active');
+                if (draggedElement) {
+                    draggedElement.classList.remove('dragging');
+                }
+                draggedElement = null;
+                draggedElementData = null;
+                isDragging = false;
+            }
+
+            // Helper Functions
+            function getDragAfterElement(container, y) {
+                const draggableElements = [...container.querySelectorAll('.draggable-item:not(.dragging)')];
+                
+                return draggableElements.reduce((closest, child) => {
+                    const box = child.getBoundingClientRect();
+                    const offset = y - box.top - box.height / 2;
+                    
+                    if (offset < 0 && offset > closest.offset) {
+                        return { offset: offset, element: child };
+                    } else {
+                        return closest;
+                    }
+                }, { offset: Number.NEGATIVE_INFINITY }).element;
+            }
+
+            function createPlaceholder() {
+                if (!placeholder) {
+                    placeholder = document.createElement('div');
+                    placeholder.className = 'drag-placeholder';
+                }
+                return placeholder;
+            }
+
+            function removePlaceholder() {
+                if (placeholder && placeholder.parentNode) {
+                    placeholder.parentNode.removeChild(placeholder);
+                }
+                placeholder = null;
+            }
+
+            function clearAllDragStyles() {
+                document.querySelectorAll('.drag-over').forEach(el => {
+                    el.classList.remove('drag-over');
+                });
+                document.querySelectorAll('.drag-target').forEach(el => {
+                    el.classList.remove('drag-target');
+                });
+                removePlaceholder();
+            }
+
+            // Handle reordering within the same list
+            function handleReorderInSameList(draggedElement, dropZone, placeholder) {
+                console.log('Handling reorder in same list');
+                
+                // Remove the dragged element from its current position
+                const originalParent = draggedElement.parentNode;
+                const originalNextSibling = draggedElement.nextSibling;
+                
+                // Insert the element at the new position (where the placeholder is)
+                if (placeholder && placeholder.parentNode) {
+                    placeholder.parentNode.insertBefore(draggedElement, placeholder);
+                    console.log('Element moved to new position');
+                } else {
+                    // If no placeholder, append to end
+                    dropZone.appendChild(draggedElement);
+                    console.log('Element moved to end of list');
+                }
+                
+                // Show visual feedback with CSS class
+                draggedElement.classList.add('just-moved');
+                
+                setTimeout(() => {
+                    draggedElement.classList.remove('just-moved');
+                }, 600);
+                
+                console.log('Reorder completed in UI');
+            }
+
+            // Handle item move between lists or within list
+            async function handleItemMove(itemId, targetShopId, isPurchasedSection = false) {
+                console.log('Moving item:', itemId, 'to shop:', targetShopId, 'purchased:', isPurchasedSection);
+                
+                try {
+                    const response = await fetch('/api/move-item', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            itemId: itemId,
+                            targetShopId: targetShopId,
+                            isPurchased: isPurchasedSection
+                        })
+                    });
+
+                    const result = await response.json();
+                    
+                    if (response.ok && result.success) {
+                        console.log('Item moved successfully');
+                        // Reload the page to reflect changes
+                        window.location.reload();
+                    } else {
+                        console.error('Failed to move item:', result.message || 'Unknown error');
+                        alert('Failed to move item: ' + (result.message || 'Unknown error'));
+                    }
+                } catch (error) {
+                    console.error('Error moving item:', error);
+                    alert('Error moving item: ' + error.message);
+                }
+            }
+
+            // Initialize drag and drop when page loads
+            initializeDragAndDrop();
+
+            // =========================
+            // SHOP LISTS DRAG AND DROP FUNCTIONALITY
+            // =========================
+            
+            let draggedShopCard = null;
+            let shopListOrder = [];
+            
+            // Initialize shop list drag and drop and responsive behavior
+            function initializeShopListFeatures() {
+                // Check screen size and apply appropriate behavior
+                if (window.innerWidth >= 992) {
+                    // Desktop: Enable drag and drop
+                    initializeShopListDragAndDrop();
+                    loadShopListOrder();
+                } else {
+                    // Mobile/Tablet: Auto-sort by item count and setup collapse
+                    autoSortShopListsByCount();
+                    initializeMobileCollapse();
+                }
+            }
+            
+            // Desktop: Shop list drag and drop functionality
+            function initializeShopListDragAndDrop() {
+                const shopCards = document.querySelectorAll('.shop-card-container');
+                const isMobile = window.innerWidth <= 991.98;
+                
+                shopCards.forEach(card => {
+                    if (!isMobile) {
+                        // Don't make the card draggable by default
+                        card.setAttribute('draggable', 'false');
+                        
+                        // Add mousedown listener to drag handle to enable dragging
+                        const dragHandle = card.querySelector('.drag-handle');
+                        if (dragHandle) {
+                            dragHandle.addEventListener('mousedown', function(e) {
+                                // Enable dragging when mouse down on drag handle
+                                card.setAttribute('draggable', 'true');
+                                card.classList.add('header-dragging');
+                            });
+                            
+                            dragHandle.addEventListener('mouseup', function(e) {
+                                // Disable dragging when mouse up
+                                setTimeout(() => {
+                                    card.setAttribute('draggable', 'false');
+                                    card.classList.remove('header-dragging');
+                                }, 100);
+                            });
+                        }
+                        
+                        // Drag events
+                        card.addEventListener('dragstart', handleShopDragStart);
+                        card.addEventListener('dragend', handleShopDragEnd);
+                        card.addEventListener('dragover', handleShopDragOver);
+                        card.addEventListener('drop', handleShopDrop);
+                        card.addEventListener('dragenter', handleShopDragEnter);
+                        card.addEventListener('dragleave', handleShopDragLeave);
+                    } else {
+                        // On mobile, disable drag completely
+                        card.setAttribute('draggable', 'false');
+                        card.removeAttribute('draggable');
+                    }
+                });
+                
+                if (!isMobile) {
+                    console.log('Shop list drag and drop initialized for desktop');
+                } else {
+                    console.log('Shop list drag and drop disabled for mobile');
+                }
+            }
+            
+            // Mobile/Tablet: Auto-sort by item count
+            function autoSortShopListsByCount() {
+                const container = document.getElementById('shopListsContainer');
+                const shopCards = Array.from(container.querySelectorAll('.shop-card-container'));
+                
+                // Remove draggable attribute on mobile
+                shopCards.forEach(card => {
+                    card.removeAttribute('draggable');
+                });
+                
+                // Sort by total item count (unpurchased + purchased)
+                shopCards.sort((a, b) => {
+                    const aCount = getTotalItemCount(a);
+                    const bCount = getTotalItemCount(b);
+                    return bCount - aCount; // Descending order (most items first)
+                });
+                
+                // Add sorting animation class
+                container.classList.add('sorting');
+                
+                // Reorder in DOM
+                shopCards.forEach(card => {
+                    container.appendChild(card);
+                });
+                
+                // Remove sorting animation class after animation completes
+                setTimeout(() => {
+                    container.classList.remove('sorting');
+                }, 500);
+                
+                console.log('Shop lists auto-sorted by item count for mobile/tablet');
+            }
+            
+            // Get total item count for a shop card (unpurchased + purchased)
+            function getTotalItemCount(shopCard) {
+                const shopId = shopCard.dataset.shopId;
+                const mainList = shopCard.querySelector(`#shoppingList-${shopId}`);
+                const purchasedList = shopCard.querySelector(`[data-shop-id="${shopId}"][data-purchased-section="true"]`);
+                
+                const mainCount = mainList ? mainList.querySelectorAll('.draggable-item').length : 0;
+                const purchasedCount = purchasedList ? purchasedList.querySelectorAll('.draggable-item').length : 0;
+                
+                return mainCount + purchasedCount;
+            }
+            
+            // Mobile/Tablet: Initialize collapse functionality
+            function initializeMobileCollapse() {
+                const collapseHeaders = document.querySelectorAll('.mobile-header');
+                
+                collapseHeaders.forEach(header => {
+                    header.addEventListener('click', function() {
+                        const icon = this.querySelector('.collapse-icon');
+                        const targetId = this.dataset.bsTarget;
+                        const collapseElement = document.querySelector(targetId);
+                        
+                        // Toggle icon rotation
+                        icon.classList.toggle('rotated');
+                        
+                        // Bootstrap collapse will handle the show/hide
+                    });
+                });
+                
+                console.log('Mobile collapse functionality initialized');
+            }
+            
+            // Desktop: Shop drag event handlers
+            function handleShopDragStart(e) {
+                // Only allow dragging if it was initiated from the drag handle
+                if (!e.currentTarget.classList.contains('header-dragging')) {
+                    e.preventDefault();
+                    return false;
+                }
+                
+                draggedShopCard = e.currentTarget;
+                draggedShopCard.classList.add('dragging');
+                
+                // Set drag data
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/html', draggedShopCard.outerHTML);
+                
+                console.log('Shop drag started:', draggedShopCard.dataset.shopName);
+            }
+            
+            function handleShopDragEnd(e) {
+                e.currentTarget.classList.remove('dragging');
+                e.currentTarget.classList.remove('header-dragging');
+                e.currentTarget.setAttribute('draggable', 'false');
+                clearShopDragStyles();
+                
+                // Save the new order
+                saveShopListOrder();
+                
+                draggedShopCard = null;
+            }
+            
+            function handleShopDragEnter(e) {
+                e.preventDefault();
+                if (e.currentTarget !== draggedShopCard) {
+                    e.currentTarget.classList.add('drag-over');
+                }
+            }
+            
+            function handleShopDragLeave(e) {
+                if (!e.currentTarget.contains(e.relatedTarget)) {
+                    e.currentTarget.classList.remove('drag-over');
+                }
+            }
+            
+            function handleShopDragOver(e) {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+            }
+            
+            function handleShopDrop(e) {
+                e.preventDefault();
+                
+                const dropTarget = e.currentTarget;
+                if (dropTarget !== draggedShopCard && draggedShopCard) {
+                    const container = dropTarget.parentNode;
+                    const allCards = Array.from(container.children);
+                    
+                    const draggedIndex = allCards.indexOf(draggedShopCard);
+                    const dropIndex = allCards.indexOf(dropTarget);
+                    
+                    if (draggedIndex < dropIndex) {
+                        // Insert after drop target
+                        container.insertBefore(draggedShopCard, dropTarget.nextSibling);
+                    } else {
+                        // Insert before drop target
+                        container.insertBefore(draggedShopCard, dropTarget);
+                    }
+                    
+                    console.log('Shop list reordered');
+                }
+                
+                clearShopDragStyles();
+            }
+            
+            function clearShopDragStyles() {
+                document.querySelectorAll('.shop-card-container').forEach(card => {
+                    card.classList.remove('drag-over');
+                });
+            }
+            
+            // Save shop list order to localStorage
+            function saveShopListOrder() {
+                const container = document.getElementById('shopListsContainer');
+                const shopCards = container.querySelectorAll('.shop-card-container');
+                const order = Array.from(shopCards).map(card => card.dataset.shopId);
+                
+                localStorage.setItem('yumsync_shop_order', JSON.stringify(order));
+                console.log('Shop list order saved:', order);
+            }
+            
+            // Load and apply saved shop list order
+            function loadShopListOrder() {
+                const savedOrder = localStorage.getItem('yumsync_shop_order');
+                if (!savedOrder) return;
+                
+                try {
+                    const order = JSON.parse(savedOrder);
+                    const container = document.getElementById('shopListsContainer');
+                    const shopCards = Array.from(container.querySelectorAll('.shop-card-container'));
+                    
+                    // Sort cards according to saved order
+                    const sortedCards = [];
+                    
+                    // First, add cards in saved order
+                    order.forEach(shopId => {
+                        const card = shopCards.find(c => c.dataset.shopId === shopId);
+                        if (card) {
+                            sortedCards.push(card);
+                        }
+                    });
+                    
+                    // Then add any new cards that weren't in saved order
+                    shopCards.forEach(card => {
+                        if (!sortedCards.includes(card)) {
+                            sortedCards.push(card);
+                        }
+                    });
+                    
+                    // Reorder in DOM
+                    sortedCards.forEach(card => {
+                        container.appendChild(card);
+                    });
+                    
+                    console.log('Shop list order loaded and applied');
+                } catch (error) {
+                    console.error('Error loading shop list order:', error);
+                }
+            }
+            
+            // Handle window resize to switch between desktop and mobile behavior
+            function handleResize() {
+                // Debounce resize events
+                clearTimeout(window.resizeTimeout);
+                window.resizeTimeout = setTimeout(() => {
+                    initializeShopListFeatures();
+                }, 250);
+            }
+            
+            // Initialize shop list features on page load
+            initializeShopListFeatures();
+            
+            // Listen for window resize
+            window.addEventListener('resize', handleResize);
+            
+            // Override updateShopItemCount to trigger re-sorting on mobile
+            const originalUpdateShopItemCount = updateShopItemCount;
+            updateShopItemCount = function() {
+                originalUpdateShopItemCount();
+                
+                // Update item count badges
+                document.querySelectorAll('.shop-card-container').forEach(card => {
+                    const shopId = card.dataset.shopId;
+                    const totalCount = getTotalItemCount(card);
+                    const badge = card.querySelector('.item-count-badge');
+                    if (badge) {
+                        badge.textContent = `${totalCount} items`;
+                    }
+                });
+                
+                // Re-sort on mobile after item count changes
+                if (window.innerWidth < 992) {
+                    setTimeout(() => {
+                        autoSortShopListsByCount();
+                    }, 100);
+                }
+            };
+
+            // Re-initialize drag and drop after dynamic content changes
+            const originalAddItemToShopList = addItemToShopList;
+            addItemToShopList = function(shopId, listItem) {
+                originalAddItemToShopList(shopId, listItem);
+                // Re-initialize drag and drop for new items
+                setTimeout(() => {
+                    initializeDragAndDrop();
+                    // Re-initialize shop list features (this will trigger mobile re-sort)
+                    initializeShopListFeatures();
+                }, 100);
+            };
+
+            // Helper function to add item to shop list in UI
+            function addItemToShopList(shopId, listItem) {
+                console.log('=== ADD ITEM TO SHOP LIST ===');
+                console.log('Shop ID:', shopId);
+                console.log('List Item:', listItem);
+                
+                let shopList = document.getElementById(`shoppingList-${shopId}`);
+                console.log('Found existing shop list:', !!shopList);
+                
+                // If the shop list doesn't exist, we need to find the shop card by ID
+                if (!shopList) {
+                    console.log('No existing list found, looking for shop card by ID...');
+                    
+                    // First, try to find an existing list with this shop ID (even if it's hidden/empty)
+                    const existingList = document.querySelector(`[id="shoppingList-${shopId}"]`);
+                    if (existingList) {
+                        console.log('Found existing list element by ID');
+                        shopList = existingList;
+                    } else {
+                        console.log('No existing list found, looking through all shop cards...');
+                        
+                        // Look through all shop cards to find the one that should have this shop ID
+                        const allShopCards = document.querySelectorAll('.col-md-6 .card');
+                        console.log('Found', allShopCards.length, 'shop cards');
+                        
+                        let targetCard = null;
+                        
+                        allShopCards.forEach((card, index) => {
+                            // Check if this card already has a list with any shop ID
+                            const existingList = card.querySelector('[id^="shoppingList-"]');
+                            if (existingList) {
+                                const existingShopId = existingList.id.replace('shoppingList-', '');
+                                console.log(`Card ${index}: has existing list for shop ID ${existingShopId}`);
+                                if (existingShopId == shopId) {
+                                    console.log(`Found matching card ${index} by existing list ID`);
+                                    targetCard = card;
+                                    shopList = existingList;
+                                }
+                            } else {
+                                // This card might be empty - check if it's the right shop by looking at header
+                                const header = card.querySelector('.card-header h5');
+                                if (header) {
+                                    const headerText = header.textContent;
+                                    console.log(`Card ${index}: "${headerText}" (checking for empty card)`);
+                                    
+                                    // For empty cards, we need to match by shop name exactly
+                                    if (listItem.shopName) {
+                                        // Extract shop name from header (remove the icon)
+                                        const shopNameInHeader = headerText.replace(/^\s*[^\w]*\s*/, '').trim();
+                                        console.log(`Extracted shop name: "${shopNameInHeader}" vs target: "${listItem.shopName}"`);
+                                        
+                                        if (shopNameInHeader === listItem.shopName) {
+                                            console.log(`Found matching empty card ${index} for shop: ${listItem.shopName}`);
+                                            targetCard = card;
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                        
+                        if (targetCard && !shopList) {
+                            console.log('Found target card, creating list structure...');
+                            const cardBody = targetCard.querySelector('.card-body');
+                            
+                            // Remove empty state but keep it for later if needed
+                            const emptyState = cardBody.querySelector('.empty-state');
+                            if (emptyState) {
+                                emptyState.remove();
+                            }
+                            
+                            // Check if there's already a list
+                            const existingList = cardBody.querySelector(`#shoppingList-${shopId}`);
+                            if (existingList) {
+                                existingList.classList.remove('d-none');
+                                shopList = existingList;
+                            } else {
+                                // Create new list that's always visible
+                                cardBody.innerHTML = `
+                                    <ul class="list-group list-group-flush draggable-list" 
+                                        id="shoppingList-${shopId}"
+                                        data-shop-id="${shopId}"
+                                        data-shop-name="${listItem.shopName}">
+                                    </ul>
+                                `;
+                                shopList = document.getElementById(`shoppingList-${shopId}`);
+                            }
+                            console.log('Created new list, found:', !!shopList);
+                        }
+                    }
+                }
+                
+                if (shopList) {
+                    console.log('Adding item to shop list...');
+                    const listElement = document.createElement('li');
+                    listElement.className = 'list-group-item d-flex justify-content-between align-items-center draggable-item';
+                    listElement.setAttribute('data-item-id', listItem.id);
+                    listElement.setAttribute('data-item-name', listItem.productName);
+                    listElement.setAttribute('data-item-quantity', listItem.quantity);
+                    listElement.setAttribute('data-item-shop-id', shopId);
+                    listElement.setAttribute('data-purchased', 'false');
+                    listElement.setAttribute('draggable', 'true');
+                    listElement.innerHTML = `
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-grip-vertical text-muted me-2"></i>
+                            <span>${listItem.productName}</span>
+                        </div>
+                        <div>
+                            <span class="badge bg-primary rounded-pill me-2">${listItem.quantity}</span>
+                            <button class="btn btn-sm btn-outline-secondary me-1 edit-item-btn" 
+                                    data-item-id="${listItem.id}"
+                                    data-item-name="${listItem.productName}"
+                                    data-item-quantity="${listItem.quantity}"
+                                    data-item-shop-id="${shopId}"
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#productModal"
+                                    title="Edit item">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-success mark-purchased-btn" 
+                                    data-item-id="${listItem.id}" 
+                                    title="Mark as purchased">
+                                <i class="fas fa-check"></i>
+                            </button>
+                        </div>
+                    `;
+                    shopList.appendChild(listElement);
+                    console.log('Item added successfully!');
+                    
+                    // Check if this is the first item in the list and we need to show purchased section
+                    const allItemsInList = shopList.querySelectorAll('.draggable-item').length;
+                    console.log('Total items in list after adding:', allItemsInList);
+                    
+                    if (allItemsInList === 1) {
+                        // This is the first item, we need to show the purchased section
+                        // (since now we have at least one item in main list)
+                        showPurchasedSectionForShop(shopId, shopList);
+                    }
+                    
+                    // Update the item count
+                    updateShopItemCount();
+                    console.log('Item counts updated');
+                } else {
+                    console.error('Could not find or create shop list - will refresh page');
+                    showAlert('Item added successfully! Refreshing page to show changes...', 'info');
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                }
+                
+                console.log('=== END ADD ITEM ===');
+            }
+
+            // Function to dynamically show purchased section when first item is added
+            function showPurchasedSectionForShop(shopId, shopList) {
+                console.log('Showing purchased section for shop:', shopId);
+                
+                const cardBody = shopList.closest('.card-body');
+                if (!cardBody) return;
+                
+                // Check if purchased section already exists
+                const existingPurchasedSection = cardBody.querySelector('[data-purchased-section="true"]');
+                if (existingPurchasedSection) {
+                    console.log('Purchased section already exists');
+                    return;
+                }
+                
+                // Find shop name from the list or card header
+                let shopName = shopList.dataset.shopName;
+                if (!shopName) {
+                    const cardHeader = cardBody.closest('.card').querySelector('.card-header h5');
+                    if (cardHeader) {
+                        shopName = cardHeader.textContent.replace(/^\s*[^\w]*\s*/, '').trim();
+                    }
+                }
+                
+                // Create the purchased section HTML
+                const purchasedSectionHTML = `
+                    <hr class="my-3 purchased-section-transition showing">
+                    <div class="d-flex justify-content-between align-items-center mb-3 purchased-section-transition showing">
+                        <h6 class="text-muted mb-0">
+                            <i class="fas fa-check-circle me-1"></i>Purchased Items (0)
+                        </h6>
+                    </div>
+                    <ul class="list-group list-group-flush draggable-list purchased-section-transition showing" 
+                        data-shop-id="${shopId}"
+                        data-shop-name="${shopName}"
+                        data-purchased-section="true">
+                    </ul>
+                `;
+                
+                // Add the purchased section after the main list
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = purchasedSectionHTML;
+                
+                // Insert all elements from tempDiv after the main shopping list
+                while (tempDiv.firstChild) {
+                    cardBody.appendChild(tempDiv.firstChild);
+                }
+                
+                console.log('Purchased section added dynamically');
+                
+                // Re-initialize drag and drop for the new elements
+                setTimeout(() => {
+                    initializeDragAndDrop();
+                }, 100);
+            }
+
+            // Function to hide purchased section when last item is removed
+            function hidePurchasedSectionForShop(shopId) {
+                console.log('Hiding purchased section for shop:', shopId);
+                
+                // Find the purchased section for this shop
+                const purchasedSection = document.querySelector(`[data-shop-id="${shopId}"][data-purchased-section="true"]`);
+                if (purchasedSection) {
+                    const cardBody = purchasedSection.closest('.card-body');
+                    
+                    // Remove the purchased section and its header/separator
+                    const hr = cardBody.querySelector('hr.my-3');
+                    const header = cardBody.querySelector('.d-flex.justify-content-between.align-items-center.mb-3');
+                    
+                    if (hr) hr.remove();
+                    if (header) header.remove();
+                    purchasedSection.remove();
+                    
+                    console.log('Purchased section hidden');
+                } else {
+                    console.log('No purchased section found to hide');
+                }
+            }
+
+            // Helper function to check if purchased section should be visible
+            function shouldShowPurchasedSection(shopId) {
+                const mainList = document.getElementById(`shoppingList-${shopId}`);
+                const purchasedSection = document.querySelector(`[data-shop-id="${shopId}"][data-purchased-section="true"]`);
+                
+                const mainItems = mainList ? mainList.querySelectorAll('.draggable-item').length : 0;
+                const purchasedItems = purchasedSection ? purchasedSection.querySelectorAll('.draggable-item').length : 0;
+                
+                console.log(`Shop ${shopId}: ${mainItems} main items, ${purchasedItems} purchased items`);
+                return (mainItems > 0 || purchasedItems > 0);
+            }
+
+            // Helper function to update existing item in UI
+            function updateItemInUI(itemId, listItem) {
+                const listElement = document.querySelector(`[data-item-id="${itemId}"]`);
+                if (listElement) {
+                    // Get the current shop ID before making changes
+                    const editButton = listElement.querySelector('.edit-item-btn');
+                    const currentShopId = parseInt(editButton.getAttribute('data-item-shop-id'));
+                    const newShopId = parseInt(listItem.shopId);
+                    
+                    console.log('Updating item:', itemId, 'from shop', currentShopId, 'to shop', newShopId);
+                    
+                    // If the shop changed, remove from current list and add to new one
+                    if (currentShopId !== newShopId) {
+                        console.log('Shop changed, moving item to new shop');
+                        // Remove from current list
+                        listElement.remove();
+                        // Add to new shop list
+                        addItemToShopList(newShopId, listItem);
+                    } else {
+                        console.log('Same shop, updating in place');
+                        // Same shop, just update the content
+                        const nameSpan = listElement.querySelector('.d-flex.align-items-center span');
+                        const quantityBadge = listElement.querySelector('.badge.bg-primary');
+
+                        if (nameSpan) {
+                            nameSpan.textContent = listItem.productName;
+                        }
+                        if (quantityBadge) {
+                            quantityBadge.textContent = listItem.quantity;
+                        }
+                        
+                        // Update all data attributes on the list element itself
+                        listElement.setAttribute('data-item-name', listItem.productName);
+                        listElement.setAttribute('data-item-quantity', listItem.quantity);
+                        listElement.setAttribute('data-item-shop-id', listItem.shopId);
+                        
+                        // Update edit button data attributes
+                        editButton.setAttribute('data-item-name', listItem.productName);
+                        editButton.setAttribute('data-item-quantity', listItem.quantity);
+                        editButton.setAttribute('data-item-shop-id', listItem.shopId);
+                        
+                        console.log('Item updated in place successfully');
+                    }
+                }
+                
+                // Update shop item counts for all shops
+                updateShopItemCount();
+            }
+
+            // Helper function to update shop item counts
+            function updateShopItemCount() {
+                console.log('Updating shop item counts');
+                
+                document.querySelectorAll('[id^="shoppingList-"]').forEach(list => {
+                    const shopCard = list.closest('.card');
+                    const countBadge = shopCard.querySelector('.badge.bg-secondary');
+                    const itemCount = list.children.length;
+                    
+                    console.log('Shop list:', list.id, 'has', itemCount, 'items');
+                    
+                    if (countBadge) {
+                        countBadge.textContent = `${itemCount} items`;
+                    }
+                    
+                    // If the list is empty, show the empty state but keep the list visible for drop
+                    if (itemCount === 0) {
+                        console.log('Shop list is empty, showing empty state');
+                        const cardBody = shopCard.querySelector('.card-body');
+                        
+                        // Keep the list visible for drop functionality
+                        list.classList.remove('d-none');
+                    } else {
+                        // Just show the list without empty state
+                        list.classList.remove('d-none');
+                    }
+                });
+            }
+
+            // Helper function to set loading state
+            function setLoadingState(loading) {
+                if (loading) {
+                    addButtonText.classList.add('d-none');
+                    addButtonSpinner.classList.remove('d-none');
+                    assignProductBtn.disabled = true;
+                } else {
+                    addButtonText.classList.remove('d-none');
+                    addButtonSpinner.classList.add('d-none');
+                    assignProductBtn.disabled = false;
+                }
+            }
+
+            // Helper function to show alerts
+            function showAlert(message, type = 'info', timeout = 5000) {
+                // Create alert element
+                const alertDiv = document.createElement('div');
+                alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+                alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+                alertDiv.innerHTML = `
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+
+                // Add to page
+                document.body.appendChild(alertDiv);
+
+                // Auto remove after specified timeout
+                setTimeout(() => {
+                    if (alertDiv.parentNode) {
+                        alertDiv.remove();
+                    }
+                }, timeout);
+            }
+        });
+    </script>
+{% endblock %}
+

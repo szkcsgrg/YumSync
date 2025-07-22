@@ -1,0 +1,118 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}YumSync Login!{% endblock %}
+
+{% block body %}
+<!-- MANUAL THEME TOGGLE BUTTON - COMMENTED OUT FOR COMPONENT TESTING
+<button id="manualThemeToggle" 
+        style="position: fixed; top: 20px; right: 20px; z-index: 1000; width: 50px; height: 50px; border-radius: 50%; border: 2px solid #000; background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 50%, #e9ecef 100%); color: #333; font-size: 20px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.1); transition: all 0.3s ease; display: flex; align-items: center; justify-content: center;"
+        title="Toggle Dark/Light Mode"
+        onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 6px 20px rgba(0,0,0,0.25), 0 4px 12px rgba(0,0,0,0.15)'"
+        onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.1)'">
+    <i class="fas fa-moon" id="manualThemeIcon" style="transition: all 0.3s ease;"></i>
+</button>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const button = document.getElementById('manualThemeToggle');
+    const icon = document.getElementById('manualThemeIcon');
+    
+    // Get saved theme
+    const savedTheme = localStorage.getItem('yumsync-theme') || 'light';
+    applyTheme(savedTheme);
+    
+    function applyTheme(theme) {
+        if (theme === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            icon.className = 'fas fa-sun';
+            button.title = 'Switch to Light Mode';
+            button.style.background = 'linear-gradient(135deg, #4a5568 0%, #2d3748 50%, #1a202c 100%)';
+            button.style.color = '#ffffff';
+            button.style.border = '2px solid #ffffff';
+        } else {
+            document.documentElement.removeAttribute('data-theme');
+            icon.className = 'fas fa-moon';
+            button.title = 'Switch to Dark Mode';
+            button.style.background = 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 50%, #e9ecef 100%)';
+            button.style.color = '#333';
+            button.style.border = '2px solid #000';
+        }
+        localStorage.setItem('yumsync-theme', theme);
+        
+        // Add rotation animation
+        icon.style.transform = 'rotate(360deg)';
+        setTimeout(() => {
+            icon.style.transform = 'rotate(0deg)';
+        }, 300);
+    }
+    
+    button.addEventListener('click', function() {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        applyTheme(newTheme);
+    });
+});
+</script>
+-->
+
+<h1>YumSync</h1>
+<h4>Login to your account</h4>
+
+<!-- Google Sign-In Button -->
+<button onclick="signInWithGoogle()">Sign in with Google</button>
+
+<!-- Firebase UI or custom email/password input
+<form id="firebase-login-form">
+    <input type="email" id="email" placeholder="Email" />
+    <input type="password" id="password" placeholder="Password" />
+    <button type="button" onclick="signIn()">Login</button>
+</form>
+-->
+{% endblock %}
+
+{% block javascripts %}
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+  import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "{{ firebase_config.apiKey }}",
+    authDomain: "{{ firebase_config.authDomain }}",
+    projectId: "{{ firebase_config.projectId }}",
+    storageBucket: "{{ firebase_config.storageBucket }}",
+    messagingSenderId: "{{ firebase_config.messagingSenderId }}",
+    appId: "{{ firebase_config.appId }}",
+    measurementId: "{{ firebase_config.measurementId }}"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
+
+  async function signInWithGoogle() {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const token = await result.user.getIdToken();
+
+      // Send the token to Symfony backend
+      const response = await fetch('/api/firebase-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token })
+      });
+      console.log(response);
+      if (response.ok) {
+        window.location.href = '/initialsetup';
+      } else {
+        alert("Login failed on backend");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Google sign-in failed: " + error.message);
+    }
+  }
+
+  // Make function available in global scope
+  window.signInWithGoogle = signInWithGoogle;
+</script>
+{% endblock %}

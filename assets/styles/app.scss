@@ -1,0 +1,12 @@
+// YumSync Main Application Styles
+// ==============================
+// This is the main entry point for all styles
+
+// 1. Import global variables first
+@use 'fonts';
+@use 'colors';
+
+// 2. Import component-specific styles
+@use 'themes';
+@use 'drag-drop';
+@use 'application';

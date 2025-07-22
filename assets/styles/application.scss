@@ -1,0 +1,1140 @@
+// YumSync Application Specific Styles
+// ===================================
+
+// ========================================
+// GLOBAL STYLES
+// ========================================
+html, body {
+    background-color: var(--bg-body);
+    color: var(--text-primary);
+    transition: background-color var(--transition-duration) var(--transition-ease), 
+                color var(--transition-duration) var(--transition-ease);
+}
+
+// Ensure all containers inherit the proper background
+.container, .container-fluid {
+    background-color: transparent;
+}
+
+// Cards proper theming
+.card {
+    background-color: var(--bg-card);
+    border-color: var(--border-primary);
+    color: var(--text-primary);
+    transition: background-color var(--transition-duration) var(--transition-ease), 
+                color var(--transition-duration) var(--transition-ease), 
+                border-color var(--transition-duration) var(--transition-ease);
+}
+
+.card-header {
+    background-color: var(--bg-header);
+    border-bottom-color: var(--border-primary);
+    color: var(--text-primary);
+}
+
+.card-body {
+    background-color: var(--bg-card);
+    color: var(--text-primary);
+}
+
+// Modal theming
+.modal-content {
+    background-color: var(--bg-card);
+    border-color: var(--border-primary);
+    color: var(--text-primary);
+}
+
+.modal-header {
+    background-color: var(--bg-header);
+    border-bottom-color: var(--border-primary);
+    color: var(--text-primary);
+}
+
+.modal-body {
+    background-color: var(--bg-card);
+    color: var(--text-primary);
+}
+
+.modal-footer {
+    background-color: var(--bg-card);
+    border-top-color: var(--border-primary);
+    color: var(--text-primary);
+}
+
+// Form controls theming
+.form-control {
+    background-color: var(--bg-card);
+    border-color: var(--border-primary);
+    color: var(--text-primary);
+    
+    &:focus {
+        background-color: var(--bg-card);
+        border-color: var(--primary);
+        color: var(--text-primary);
+        box-shadow: 0 0 0 0.25rem var(--primary-light);
+    }
+    
+    &::placeholder {
+        color: var(--text-muted);
+    }
+}
+
+.form-select {
+    background-color: var(--bg-card);
+    border-color: var(--border-primary);
+    color: var(--text-primary);
+    
+    &:focus {
+        background-color: var(--bg-card);
+        border-color: var(--primary);
+        color: var(--text-primary);
+    }
+}
+
+.form-label {
+    color: var(--text-primary);
+}
+
+// Text muted styling (for headings like "Purchased Items")
+.text-muted {
+    color: var(--text-muted) !important;
+}
+
+// List items proper theming
+.list-group-item {
+    background-color: var(--bg-card);
+    color: var(--text-primary);
+    border-color: var(--border-primary);
+    transition: background-color var(--transition-duration) var(--transition-ease), 
+                color var(--transition-duration) var(--transition-ease), 
+                border-color var(--transition-duration) var(--transition-ease);
+    
+    &:hover {
+        background-color: var(--bg-secondary);
+    }
+}
+
+// Purchased items styling
+.purchased-item-clickable {
+    text-decoration: line-through !important;
+    color: var(--text-muted) !important;
+    cursor: pointer !important;
+    
+    .text-muted {
+        color: var(--text-muted) !important;
+    }
+    
+    &:hover {
+        background-color: var(--purchased-bg) !important;
+        color: var(--text-secondary) !important;
+    }
+}
+
+// Drag handle styling
+.fa-grip-vertical {
+    cursor: grab !important;
+    
+    &:active {
+        cursor: grabbing !important;
+    }
+}
+
+// Shopping List Drag and Drop Styles
+.shop-card-container {
+    transition: transform var(--transition-duration) ease, all 0.3s ease;
+    
+    &.dragging {
+        opacity: 0.5;
+        transform: rotate(5deg);
+    }
+    
+    &.drag-over {
+        transform: scale(1.05);
+        box-shadow: 0 0 20px var(--drag-bg-over);
+    }
+}
+
+.drag-handle {
+    cursor: grab !important;
+    
+    &:active {
+        cursor: grabbing !important;
+    }
+}
+
+// Mobile/Tablet Responsive Behavior
+@media (max-width: 991.98px) {
+    .mobile-header {
+        background-color: var(--bg-header);
+        border-bottom: 1px solid var(--border-primary);
+        min-height: var(--mobile-touch-target);
+        padding: var(--font-large);
+        font-size: var(--font-xlarge);
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        transition: background-color var(--transition-duration) var(--transition-ease), 
+                    color var(--transition-duration) var(--transition-ease), 
+                    border-color var(--transition-duration) var(--transition-ease);
+        
+        &:hover {
+            background-color: var(--bg-tertiary);
+        }
+        
+        &.restored {
+            background-color: var(--primary-light) !important;
+            transition: background-color 0.5s ease;
+        }
+        
+        &.auto-opened {
+            background-color: var(--success-light) !important;
+            transition: background-color 0.5s ease;
+        }
+    }
+    
+    .collapse-icon {
+        transition: transform 0.3s ease;
+        
+        &.rotated {
+            transform: rotate(180deg);
+        }
+    }
+    
+    // Disable drag and drop on mobile for better touch experience
+    .draggable-item {
+        -webkit-user-drag: none;
+        -khtml-user-drag: none;
+        -moz-user-drag: none;
+        -o-user-drag: none;
+        user-drag: none;
+        
+        &[draggable="true"] {
+            draggable: false !important;
+        }
+    }
+    
+    .shop-card-container {
+        -webkit-user-drag: none;
+        -khtml-user-drag: none;
+        -moz-user-drag: none;
+        -o-user-drag: none;
+        user-drag: none;
+        
+        &[draggable="true"] {
+            draggable: false !important;
+        }
+    }
+    
+    // Hide ALL drag handles and grip icons on mobile
+    .fa-grip-vertical, .drag-handle {
+        display: none !important;
+    }
+    
+    // Remove all drag-related visual elements on mobile
+    .draggable-list {
+        border: none !important;
+        background-color: transparent !important;
+        
+        &:empty {
+            display: none !important; // Hide empty drop zones completely
+        }
+        
+        &.drag-over, &[data-purchased-section="true"] {
+            border: none !important;
+            background-color: transparent !important;
+        }
+    }
+    
+    // Remove the draggable list borders and styling on mobile
+    .list-group-flush {
+        border: none !important;
+    }
+    
+    // Clean up list items to look like regular lists
+    .list-group-item {
+        border-left: none !important;
+        border-right: none !important;
+        border-top: none !important;
+        border-bottom: 1px solid var(--border-primary) !important;
+        background-color: transparent !important;
+        margin-bottom: 0 !important;
+        
+        &:first-child {
+            border-top: none !important;
+        }
+        
+        &:last-child {
+            border-bottom: none !important;
+        }
+    }
+    
+    // Hide the visual drop zone hints that appear during dragging
+    body.dragging-active .draggable-list {
+        border: none !important;
+        background-color: transparent !important;
+    }
+}
+
+@media (min-width: 992px) {
+    .mobile-header {
+        background-color: var(--bg-secondary);
+        border-bottom: 1px solid var(--border-primary);
+        padding: var(--font-base);
+        cursor: default !important; // No pointer cursor on desktop
+        user-select: none; // Disable text selection
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        
+        &:hover {
+            background-color: var(--bg-tertiary);
+        }
+    }
+    
+    // Disable collapse functionality on desktop
+    .mobile-header[data-bs-toggle="collapse"] {
+        pointer-events: none;
+        cursor: default !important;
+    }
+    
+    .mobile-header[data-bs-toggle="collapse"] .drag-handle {
+        pointer-events: auto;
+        cursor: grab !important;
+    }
+    
+    // Ensure drag handles are visible on desktop
+    .fa-grip-vertical, .drag-handle {
+        display: inline !important;
+    }
+    
+    // Ensure drag and drop styling works on desktop
+    .draggable-list {
+        &:empty {
+            min-height: var(--mobile-touch-target);
+            border: 2px dashed var(--border-primary);
+            border-radius: var(--border-radius);
+            background-color: var(--bg-secondary);
+            
+            &::after {
+                content: "Drop items here";
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                color: var(--text-muted);
+                font-style: italic;
+                font-size: var(--font-small);
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                opacity: 0;
+                transition: all var(--transition-duration) ease;
+            }
+        }
+        
+        &.drag-over {
+            background-color: var(--drag-bg-over) !important;
+            border: 2px solid var(--primary) !important;
+            
+            &:empty::after {
+                opacity: 1;
+                color: var(--primary);
+                font-weight: 500;
+            }
+        }
+    }
+}
+
+// Improved mobile collapse transitions
+.collapse {
+    transition: height 0.3s ease-in-out;
+    
+    &.auto-opening {
+        animation: slideDownGently 0.4s ease-out;
+    }
+}
+
+.collapse-icon {
+    transition: transform 0.2s ease-in-out;
+}
+
+@keyframes slideDownGently {
+    from {
+        opacity: 0;
+        transform: translateY(calc(-1 * var(--font-base)));
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+// List placeholder for drag and drop
+.list-drop-placeholder {
+    height: calc(var(--mobile-touch-target) * 4);
+    border: 2px dashed var(--primary);
+    background-color: var(--drag-bg-over);
+    border-radius: var(--border-radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: var(--font-base) 0;
+    color: var(--primary);
+}
+
+// Auto-sort animation for mobile
+.sorting {
+    pointer-events: none;
+    
+    .shop-card-container {
+        transition: all 0.5s ease;
+    }
+}
+
+// Purchased section transitions
+.purchased-section-transition {
+    transition: all 0.3s ease-in-out;
+    overflow: hidden;
+    
+    &.hiding {
+        opacity: 0;
+        max-height: 0;
+        margin: 0;
+    }
+    
+    &.showing {
+        opacity: 1;
+        max-height: 500px;
+        margin: inherit;
+    }
+}
+
+// Draggable items
+.draggable-item {
+    transition: transform var(--transition-duration) ease, background-color 0.3s ease;
+    user-select: none; // Disable text selection
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    
+    &.just-moved {
+        background-color: var(--just-moved-bg) !important;
+        transform: scale(1.02);
+    }
+    
+    &.dragging {
+        opacity: 0.3;
+        transform: rotate(2deg);
+        z-index: var(--z-index-dragging);
+        position: relative;
+    }
+    
+    &:hover .fa-grip-vertical {
+        color: var(--primary) !important;
+    }
+    
+    // Prevent draggable items from making their parent containers draggable
+    &[draggable="true"] {
+        // Stop propagation of drag events to parent shop cards
+        &:not(.shop-card-container) {
+            pointer-events: auto;
+        }
+    }
+}
+
+// Shop card containers - only draggable from header area
+.shop-card-container {
+    // By default, shop cards are not draggable
+    &:not(.header-dragging) {
+        -webkit-user-drag: none;
+        -khtml-user-drag: none;
+        -moz-user-drag: none;
+        -o-user-drag: none;
+        user-drag: none;
+    }
+    
+    // Only allow dragging when initiated from header
+    &.header-dragging {
+        -webkit-user-drag: element;
+        -khtml-user-drag: element;
+        -moz-user-drag: element;
+        -o-user-drag: element;
+        user-drag: element;
+    }
+}
+
+// Disable text selection on badges and other UI elements
+.badge, .btn, .card-header, .list-group-item {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+// ========================================
+// COMPONENT FONT STYLES
+// ========================================
+.btn {
+    font-size: var(--font-base);
+    padding: 0.375rem 0.75rem;
+}
+
+.btn-sm {
+    font-size: var(--font-small);
+    padding: 0.25rem 0.5rem;
+}
+
+.card-title {
+    font-size: var(--font-large);
+    font-weight: 600;
+}
+
+.card-header h5 {
+    font-size: var(--font-large);
+    font-weight: 600;
+}
+
+.list-group-item {
+    font-size: var(--font-base);
+}
+
+.badge {
+    font-size: var(--font-small);
+}
+
+.form-control {
+    font-size: var(--font-base);
+}
+
+.form-label {
+    font-size: var(--font-base);
+    font-weight: 500;
+}
+
+// Draggable lists
+.draggable-list {
+    min-height: 60px;
+    transition: all var(--transition-duration) ease;
+    position: relative;
+    border: 2px dashed transparent;
+    border-radius: var(--border-radius);
+    margin: 0.25rem 0;
+    
+    &:not([data-purchased-section="true"]) {
+        background-color: var(--drag-area-bg);
+        border-color: var(--drag-area-border);
+    }
+    
+    &[data-purchased-section="true"] {
+        background-color: var(--drag-area-purchased-bg);
+        border-color: var(--purchased-border);
+        
+        &:empty::after {
+            content: "Drop to mark as purchased";
+            color: var(--success);
+            opacity: 0;
+        }
+        
+        &.drag-over:empty {
+            border-color: var(--success);
+            background-color: var(--success-light);
+            border-style: solid;
+            
+            &::after {
+                color: var(--success-dark);
+                font-weight: 500;
+                opacity: 1;
+            }
+        }
+    }
+    
+    &.drag-over {
+        background-color: var(--drag-bg-over) !important;
+        border: 2px solid var(--primary) !important;
+        border-radius: var(--border-radius);
+        padding: 0.5rem;
+        transform: scale(1.02);
+        
+        &:empty::after {
+            opacity: 1;
+            color: var(--primary);
+            font-weight: 500;
+        }
+    }
+    
+    &:empty {
+        min-height: 60px;
+        border: 2px dashed var(--border-primary);
+        border-radius: var(--border-radius);
+        transition: all var(--transition-duration) ease;
+        position: relative;
+        background-color: var(--bg-secondary);
+        margin: 0.5rem 0;
+        
+        &::after {
+            content: "Drop items here";
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: var(--text-muted);
+            font-style: italic;
+            font-size: var(--font-small);
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            opacity: 0;
+            transition: all var(--transition-duration) ease;
+        }
+        
+        &.drag-over {
+            border-color: var(--primary);
+            background-color: var(--drag-bg-over);
+            border-style: solid;
+        }
+    }
+}
+
+.empty-state + .draggable-list:empty {
+    margin-top: -1rem;
+    min-height: 40px;
+    background-color: transparent;
+    border-color: transparent;
+    
+    &::after {
+        opacity: 0;
+    }
+}
+
+// Dragging active state
+body.dragging-active {
+    .draggable-list {
+        border-style: solid !important;
+        border-width: 2px !important;
+        
+        &:empty::after {
+            opacity: 1 !important;
+            color: var(--primary);
+        }
+        
+        &:not([data-purchased-section="true"]) {
+            border-color: var(--primary) !important;
+            background-color: var(--drag-area-active-bg) !important;
+        }
+        
+        &[data-purchased-section="true"] {
+            border-color: var(--success) !important;
+            background-color: var(--drag-area-purchased-active-bg) !important;
+            
+            &:empty::after {
+                opacity: 1 !important;
+                color: var(--success);
+            }
+        }
+    }
+    
+    .empty-state + .draggable-list:empty::after {
+        opacity: 1;
+        color: var(--primary);
+    }
+}
+
+// Drag placeholder
+.drag-placeholder {
+    height: 4px;
+    background-color: var(--primary);
+    margin: 4px 0;
+    border-radius: 2px;
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.5; }
+    50% { opacity: 1; }
+    100% { opacity: 0.5; }
+}
+
+.card.drag-target {
+    border: 2px dashed var(--primary);
+    background-color: var(--bg-secondary);
+}
+
+// Mobile touch improvements
+@media (hover: none) and (pointer: coarse) {
+    .draggable-item {
+        padding: 1rem 0.75rem;
+        margin: 0.25rem 0;
+    }
+    
+    .fa-grip-vertical {
+        font-size: 1.2em;
+        padding: 0.5rem;
+    }
+}
+
+// Responsive Font Sizing - iPhone 12 és hasonló készülékekhez optimalizálva
+@media (max-width: 575.98px) {
+    /* Extra small devices (phones) - Using CSS Variables */
+    .card-title {
+        font-size: var(--font-mobile-card-title);
+        font-weight: 700;
+    }
+    
+    .card-header h5 {
+        font-size: var(--font-mobile-card-header);
+        font-weight: 700;
+    }
+    
+    .list-group-item {
+        font-size: var(--font-mobile-list-item);
+        padding: var(--mobile-list-padding-y) var(--mobile-list-padding-x);
+        line-height: 1.5;
+    }
+    
+    .btn-sm {
+        font-size: var(--font-mobile-button-sm);
+        padding: var(--mobile-btn-sm-padding-y) var(--mobile-btn-sm-padding-x);
+    }
+    
+    .badge {
+        font-size: var(--font-mobile-badge);
+        padding: var(--mobile-btn-sm-padding-y) var(--mobile-btn-sm-padding-x);
+    }
+    
+    .form-control {
+        font-size: var(--font-mobile-form-control);
+        padding: var(--mobile-form-padding-y) var(--mobile-form-padding-x);
+    }
+    
+    .form-label {
+        font-size: var(--font-mobile-form-label);
+        font-weight: 700;
+    }
+    
+    /* Welcome text and user info */
+    p {
+        font-size: var(--font-mobile-base);
+    }
+    
+    /* Button text in main interface */
+    .btn {
+        font-size: var(--font-mobile-button);
+        //padding: var(--mobile-btn-padding-y) var(--mobile-btn-padding-x);
+    }
+    
+    /* Modal content for better readability */
+    .modal-body {
+        font-size: var(--font-mobile-base);
+    }
+    
+    .modal-title {
+        font-size: var(--font-mobile-xl);
+    }
+    
+    /* Input groups and form elements */
+    .input-group .form-control {
+        font-size: var(--font-mobile-form-control);
+    }
+    
+    .input-group .btn {
+        font-size: var(--font-mobile-button);
+    }
+    
+    /* Shop selection and other selects */
+    .form-select {
+        font-size: var(--font-mobile-form-control);
+        padding: var(--mobile-form-padding-y) var(--mobile-form-padding-x);
+    }
+    
+    /* Quantity controls */
+    .input-group button {
+        font-size: var(--font-mobile-form-control);
+        //padding: var(--mobile-btn-padding-y) var(--mobile-btn-padding-x);
+    }
+}
+
+// SUPER MOBILE BREAKPOINT - Extrém kis telefonok (max 400px)
+@media (max-width: 400px) {
+    /* Very small phones - Using CSS Variables */
+    .card-title {
+        font-size: var(--font-small-card-title) !important;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+    
+    .card-header h5 {
+        font-size: var(--font-small-card-header) !important;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+    
+    .list-group-item {
+        font-size: var(--font-small-list-item) !important;
+        padding: 1.2rem 1.4rem !important;
+        line-height: 1.3;
+    }
+    
+    .btn-sm {
+        font-size: var(--font-small-button-sm) !important;
+        //padding: 0.8rem 1rem !important;
+    }
+    
+    .badge {
+        font-size: var(--font-small-badge) !important;
+        //padding: 0.6rem 0.8rem !important;
+    }
+    
+    .form-control {
+        font-size: var(--font-small-form-control) !important;
+        padding: 1rem 1.2rem !important;
+    }
+    
+    .form-label {
+        font-size: var(--font-small-form-label) !important;
+        font-weight: 700;
+    }
+    
+    /* Welcome text and user info */
+    p {
+        font-size: var(--font-small-list-item) !important;
+    }
+    
+    /* Button text in main interface */
+    .btn {
+        font-size: var(--font-small-button) !important;
+        //padding: 0.9rem 1.1rem !important;
+    }
+    
+    /* Modal content for better readability */
+    .modal-body {
+        font-size: var(--font-small-button) !important;
+        padding: 1.2rem !important;
+    }
+    
+    .modal-title {
+        font-size: var(--font-small-card-header) !important;
+    }
+    
+    /* Input groups and form elements */
+    .input-group .form-control {
+        font-size: var(--font-small-form-control) !important;
+    }
+    
+    .input-group .btn {
+        font-size: var(--font-small-button) !important;
+    }
+    
+    /* Shop selection and other selects */
+    .form-select {
+        font-size: var(--font-small-form-control) !important;
+        padding: 1rem 1.2rem !important;
+    }
+    
+    /* Quantity controls */
+    .input-group button {
+        font-size: var(--font-small-form-control) !important;
+        padding: 0.9rem 1.1rem !important;
+    }
+    
+    /* Mobile header specifikus */
+    .mobile-header {
+        min-height: 85px !important;
+        padding: 1.5rem !important;
+        font-size: var(--font-small-card-header) !important;
+    }
+    
+    /* Touch targets megfelelő méretek */
+    .mark-purchased-btn, .edit-item-btn {
+        min-width: 48px !important;
+        min-height: 48px !important;
+        font-size: var(--font-small-form-control) !important;
+    }
+    
+    /* Badge-ek */
+    .badge.bg-primary, .badge.bg-secondary {
+        font-size: var(--font-small-badge) !important;
+        padding: 0.6rem 0.8rem !important;
+        font-weight: 700;
+    }
+    
+    /* Ikonok */
+    .fas {
+        font-size: var(--font-small-form-control) !important;
+    }
+    
+    /* Container és kártyák */
+    .container-fluid {
+        padding-left: 0.75rem !important;
+        padding-right: 0.75rem !important;
+    }
+    
+    .card {
+        margin-bottom: 1.2rem !important;
+    }
+    
+    /* Modal javítások */
+    .modal-dialog {
+        margin: 1rem !important;
+    }
+    
+    .modal-content {
+        border-radius: 0.8rem !important;
+    }
+    
+    .modal-header, .modal-body, .modal-footer {
+        padding: 1.2rem !important;
+    }
+}
+
+// Specifikus breakpoint iPhone 12 Pro és hasonló nagyobb telefonokhoz (390px-414px)
+@media (min-width: 360px) and (max-width: 430px) {
+    /* iPhone 12, 12 Pro, 13, 14 series - Using CSS Variables */
+    .card-title {
+        font-size: var(--font-iphone-card-title) !important;
+        font-weight: 700;
+    }
+    
+    .card-header h5 {
+        font-size: var(--font-iphone-card-header) !important;
+        font-weight: 700;
+    }
+    
+    .list-group-item {
+        font-size: var(--font-iphone-list-item) !important;
+        //padding: 1.7rem 1.8rem !important;
+        line-height: 1.6;
+    }
+    
+    .btn-sm {
+        font-size: var(--font-iphone-button-sm) !important;
+        //padding: 1.1rem 1.4rem !important;
+    }
+    
+    .badge {
+        font-size: var(--font-iphone-badge) !important;
+        //padding: 0.9rem 1.2rem !important;
+    }
+    
+    .form-control {
+        font-size: var(--font-iphone-form-control) !important;
+        padding: 1.4rem 1.6rem !important;
+    }
+    
+    .form-label {
+        font-size: var(--font-iphone-form-label) !important;
+        font-weight: 700;
+    }
+    
+    .btn {
+        font-size: var(--font-iphone-button) !important;
+        //padding: 1.2rem 1.5rem !important;
+    }
+    
+    .modal-body {
+        font-size: var(--font-iphone-button) !important;
+    }
+    
+    .modal-title {
+        font-size: var(--font-iphone-card-header) !important;
+    }
+    
+    .input-group .form-control {
+        font-size: var(--font-iphone-form-control) !important;
+    }
+    
+    .input-group .btn {
+        font-size: var(--font-iphone-button) !important;
+    }
+    
+    .form-select {
+        font-size: var(--font-iphone-form-control) !important;
+        padding: 1.4rem 1.6rem !important;
+    }
+    
+    .input-group button {
+        font-size: var(--font-iphone-form-control) !important;
+        //padding: 1.2rem 1.5rem !important;
+    }
+    
+    p {
+        font-size: var(--font-iphone-button) !important;
+    }
+}
+
+@media (min-width: 576px) and (max-width: 767.98px) {
+    /* Small devices (landscape phones) - Using CSS Variables */
+    .card-title {
+        font-size: var(--font-card-title);
+    }
+    
+    .card-header h5 {
+        font-size: var(--font-card-header);
+    }
+    
+    .list-group-item {
+        font-size: var(--font-list-item);
+        //padding: 0.85rem 1rem;
+    }
+    
+    .btn-sm {
+        font-size: var(--font-button-sm);
+        padding: 0.35rem 0.7rem;
+    }
+    
+    .badge {
+        font-size: var(--font-badge);
+    }
+}
+
+@media (min-width: 768px) and (max-width: 991.98px) {
+    /* Medium devices (tablets) - Using CSS Variables */
+    .card-title {
+        font-size: var(--font-card-title);
+    }
+    
+    .card-header h5 {
+        font-size: var(--font-card-header);
+    }
+    
+    .list-group-item {
+        font-size: var(--font-list-item);
+        padding: 0.9rem 1rem;
+    }
+    
+    .btn-sm {
+        font-size: var(--font-button-sm);
+        padding: 0.4rem 0.8rem;
+    }
+    
+    .badge {
+        font-size: var(--font-badge);
+    }
+}
+
+@media (min-width: 992px) {
+    /* Large devices (desktops) and above - Using CSS Variables */
+    .card-title {
+        font-size: var(--font-card-title);
+    }
+    
+    .card-header h5 {
+        font-size: var(--font-card-header);
+    }
+    
+    .list-group-item {
+        font-size: var(--font-list-item);
+    }
+}
+
+// Additional mobile-specific improvements - Using CSS Variables
+@media (max-width: 767.98px) {
+    .container-fluid {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+    
+    .card {
+        margin-bottom: 1.5rem;
+    }
+    
+    .btn-group .btn {
+        font-size: var(--font-mobile-button);
+        padding: var(--mobile-btn-padding-y) var(--mobile-btn-padding-x);
+    }
+    
+    .input-group {
+        font-size: var(--font-mobile-form-control);
+    }
+    
+    /* Better touch targets on mobile */
+    .mark-purchased-btn, .edit-item-btn {
+        min-width: 52px;
+        min-height: 52px;
+        font-size: var(--font-mobile-button);
+    }
+    
+    /* Improve spacing and readability */
+    .list-group-item {
+        margin-bottom: 0;
+    }
+    
+    /* Better badge visibility */
+    .badge.bg-primary, .badge.bg-secondary {
+        font-size: var(--font-mobile-badge);
+        padding: var(--mobile-btn-sm-padding-y) var(--mobile-btn-sm-padding-x);
+        font-weight: 700;
+    }
+    
+    /* Icon sizes for better visibility */
+    .fas {
+        font-size: var(--font-mobile-button);
+    }
+    
+    /* Welcome text larger on mobile */
+    .container-fluid p {
+        font-size: var(--font-mobile-form-control);
+        margin-bottom: 1.5rem;
+    }
+}
+
+// iPhone 12/13/14 specific improvements - Using CSS Variables
+@media (min-width: 360px) and (max-width: 430px) {
+    .mobile-header {
+        min-height: 85px !important;
+        padding: 1.5rem !important;
+        font-size: var(--font-iphone-card-header) !important;
+    }
+    
+    .btn-group .btn{
+        font-size: var(--font-iphone-button-sm) !important;
+        //padding: 0.5rem 1rem !important;
+    }
+    
+    .mark-purchased-btn, .edit-item-btn {
+        min-width: 36px !important;
+        min-height: 36px !important;
+        font-size: var(--font-iphone-button) !important;
+        padding: 0 !important;
+    }
+    
+    .badge.bg-primary, .badge.bg-secondary {
+        font-size: var(--font-iphone-badge) !important;
+        //padding: 0.8rem 1rem !important;
+        font-weight: 700;
+    }
+    
+    .fas {
+        font-size: var(--font-iphone-button) !important;
+    }
+    
+    .container-fluid p {
+        font-size: var(--font-iphone-form-control) !important;
+        margin-bottom: 1.8rem;
+    }
+    
+    // Modal specific iPhone improvements
+    .modal-dialog {
+        margin: 1rem !important;
+    }
+    
+    .modal-content {
+        border-radius: 1rem !important;
+    }
+    
+    .modal-header {
+        padding: 1.5rem !important;
+    }
+    
+    .modal-body {
+        padding: 1.5rem !important;
+    }
+    
+    .modal-footer {
+        padding: 1.5rem !important;
+    }
+}

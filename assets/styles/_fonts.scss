@@ -1,0 +1,87 @@
+// YumSync Font System
+// ===================
+// Font sizes based on Bootstrap 5 breakpoints (sm, md, lg, xl)
+// 4 font sizes for each breakpoint: small, base, large, xlarge
+
+:root {
+  // ========================================
+  // BASE FONT SIZES (Mobile First - xs)
+  // ========================================
+  --font-small: 0.875rem;    // 14px
+  --font-base: 1rem;         // 16px  
+  --font-large: 1.125rem;    // 18px
+  --font-xlarge: 1.25rem;    // 20px
+  
+  // Component Font Variables (Mobile First)
+  --font-button: var(--font-base);
+  --font-card-title: var(--font-large);
+  --font-list-item: var(--font-base);
+  --font-badge: var(--font-small);
+}
+
+// ========================================
+// SM BREAKPOINT (≥576px) - Small devices
+// ========================================
+@media (min-width: 576px) {
+  :root {
+    --font-small: 0.875rem;    // 14px
+    --font-base: 1rem;         // 16px
+    --font-large: 1.125rem;    // 18px
+    --font-xlarge: 1.375rem;   // 22px
+  }
+}
+
+// ========================================
+// MD BREAKPOINT (≥768px) - Medium devices
+// ========================================
+@media (min-width: 768px) {
+  :root {
+    --font-small: 0.875rem;    // 14px
+    --font-base: 1rem;         // 16px
+    --font-large: 1.25rem;     // 20px
+    --font-xlarge: 1.5rem;     // 24px
+  }
+}
+
+// ========================================
+// LG BREAKPOINT (≥992px) - Large devices
+// ========================================
+@media (min-width: 992px) {
+  :root {
+    --font-small: 0.875rem;    // 14px
+    --font-base: 1rem;         // 16px
+    --font-large: 1.25rem;     // 20px
+    --font-xlarge: 1.5rem;     // 24px
+  }
+}
+
+// ========================================
+// XL BREAKPOINT (≥1200px) - Extra large devices
+// ========================================
+@media (min-width: 1200px) {
+  :root {
+    --font-small: 0.875rem;    // 14px
+    --font-base: 1rem;         // 16px
+    --font-large: 1.25rem;     // 20px
+    --font-xlarge: 1.5rem;     // 24px
+  }
+}
+
+// ========================================
+// FONT MIXINS
+// ========================================
+@mixin font-small {
+  font-size: var(--font-small);
+}
+
+@mixin font-base {
+  font-size: var(--font-base);
+}
+
+@mixin font-large {
+  font-size: var(--font-large);
+}
+
+@mixin font-xlarge {
+  font-size: var(--font-xlarge);
+}

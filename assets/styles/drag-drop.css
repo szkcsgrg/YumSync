@@ -1,0 +1,184 @@
+.purchased-section-transition {
+  transition: all 0.3s ease-in-out;
+  overflow: hidden;
+}
+.purchased-section-transition.hiding {
+  opacity: 0;
+  max-height: 0;
+  margin: 0;
+}
+.purchased-section-transition.showing {
+  opacity: 1;
+  max-height: calc(var(--mobile-touch-target) * 10);
+  margin: inherit;
+}
+
+.draggable-item {
+  transition: background-color var(--transition-duration) var(--transition-ease), color var(--transition-duration) var(--transition-ease), border-color var(--transition-duration) var(--transition-ease);
+  font-size: var(--font-base);
+}
+.draggable-item.just-moved {
+  background-color: var(--just-moved-bg) !important;
+  transform: scale(1.02);
+}
+.draggable-item.dragging {
+  opacity: 0.3;
+  transform: rotate(2deg);
+  z-index: var(--z-index-dragging);
+  position: relative;
+}
+.draggable-item:hover .fa-grip-vertical {
+  color: var(--primary) !important;
+}
+
+.draggable-list {
+  min-height: var(--mobile-touch-target);
+  transition: all var(--transition-duration) ease;
+  position: relative;
+  border: 2px dashed transparent;
+  border-radius: var(--border-radius);
+  margin: var(--font-small) 0;
+}
+.draggable-list:not([data-purchased-section=true]) {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-secondary);
+}
+.draggable-list[data-purchased-section=true] {
+  background-color: var(--purchased-bg);
+  border-color: var(--purchased-border);
+}
+.draggable-list.drag-over {
+  background-color: var(--drag-bg-over) !important;
+  border: 2px solid var(--drag-border) !important;
+  border-radius: var(--border-radius);
+  padding: var(--font-small);
+  transform: scale(1.02);
+}
+.draggable-list.drag-over:empty::after {
+  opacity: 1;
+  color: var(--drag-border);
+  font-weight: 500;
+}
+
+.draggable-list:empty {
+  min-height: var(--mobile-touch-target);
+  border: 2px dashed var(--border-primary);
+  border-radius: var(--border-radius);
+  transition: all var(--transition-duration) ease;
+  position: relative;
+  background-color: var(--bg-tertiary);
+  margin: var(--font-small) 0;
+}
+.draggable-list:empty::after {
+  content: "Drop items here";
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: var(--text-muted);
+  font-style: italic;
+  font-size: var(--font-small);
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  opacity: 0;
+  transition: all var(--transition-duration) ease;
+}
+.draggable-list:empty.drag-over {
+  border-color: var(--drag-border);
+  background-color: var(--drag-bg-over);
+  border-style: solid;
+}
+
+.empty-state + .draggable-list:empty {
+  margin-top: calc(-1 * var(--font-base));
+  min-height: calc(var(--mobile-touch-target) * 0.8);
+  background-color: transparent;
+  border-color: transparent;
+}
+.empty-state + .draggable-list:empty::after {
+  opacity: 0;
+}
+
+.draggable-list[data-purchased-section=true]:empty::after {
+  content: "Drop to mark as purchased";
+  color: var(--success);
+  opacity: 0;
+}
+.draggable-list[data-purchased-section=true].drag-over:empty {
+  border-color: var(--success);
+  background-color: var(--success-light);
+  border-style: solid;
+}
+.draggable-list[data-purchased-section=true].drag-over:empty::after {
+  color: var(--success-dark);
+  font-weight: 500;
+  opacity: 1;
+}
+
+body.dragging-active .draggable-list {
+  border-style: solid !important;
+  border-width: 2px !important;
+}
+body.dragging-active .draggable-list:empty::after {
+  opacity: 1 !important;
+  color: var(--drag-border);
+}
+body.dragging-active .draggable-list:not([data-purchased-section=true]) {
+  border-color: var(--drag-border) !important;
+  background-color: var(--drag-bg-over) !important;
+}
+body.dragging-active .draggable-list[data-purchased-section=true] {
+  border-color: var(--success) !important;
+  background-color: var(--success-light) !important;
+}
+body.dragging-active .draggable-list[data-purchased-section=true]:empty::after {
+  opacity: 1 !important;
+  color: var(--success);
+}
+body.dragging-active .empty-state + .draggable-list:empty::after {
+  opacity: 1;
+  color: var(--drag-border);
+}
+
+.drag-placeholder {
+  height: calc(var(--font-small) / 4);
+  background-color: var(--drag-placeholder);
+  margin: calc(var(--font-small) / 4) 0;
+  border-radius: calc(var(--border-radius) / 3);
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.5;
+  }
+}
+.card-body {
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+}
+
+.card.drag-target {
+  border: 2px dashed var(--drag-border);
+  background-color: var(--drag-bg-over);
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .draggable-item {
+    padding: var(--font-base) calc(var(--font-base) * 0.75);
+    margin: var(--font-small) 0;
+  }
+  .fa-grip-vertical {
+    font-size: 1.2em;
+    padding: var(--font-small);
+  }
+}

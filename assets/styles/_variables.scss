@@ -1,0 +1,229 @@
+// YumSync Global Color Variables
+// =============================
+// This file contains all color definitions for the YumSync application
+// Import this file into other SCSS files using: @import 'variables';
+
+// Base Colors - Light Theme (default)
+:root {
+  // Primary Brand Colors
+  --primary: #007bff;
+  --primary-light: #e3f2fd;
+  --primary-dark: #0056b3;
+  
+  --secondary: #6c757d;
+  --secondary-light: #e9ecef;
+  --secondary-dark: #495057;
+  
+  // Semantic Colors
+  --success: #198754;
+  --success-light: #d1e7dd;
+  --success-dark: #0f5132;
+  
+  --warning: #ffc107;
+  --warning-light: #fff3cd;
+  --warning-dark: #664d03;
+  
+  --danger: #dc3545;
+  --danger-light: #f8d7da;
+  --danger-dark: #721c24;
+  
+  --info: #0dcaf0;
+  --info-light: #d1ecf1;
+  --info-dark: #055160;
+  
+  // Light Theme Backgrounds
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --bg-tertiary: #e9ecef;
+  --bg-card: #ffffff;
+  --bg-header: #f8f9fa;
+  --bg-modal: #ffffff;
+  --bg-body: #ffffff;
+  
+  // Light Theme Text Colors
+  --text-primary: #212529;
+  --text-secondary: #6c757d;
+  --text-muted: #868e96;
+  --text-light: #adb5bd;
+  --text-white: #ffffff;
+  --text-dark: #212529;
+  
+  --border-secondary: #e9ecef;
+  --border-light: #f1f3f4;
+  --border-dark: #adb5bd;
+  
+  // Light Theme Shadows
+  --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  --shadow-md: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+  
+  // Drag and Drop Specific Colors
+  --drag-bg-over: rgba(0, 123, 255, 0.1);
+  --drag-border: var(--primary);
+  --drag-placeholder: var(--primary);
+  
+  // Shopping List State Colors
+  --purchased-bg: rgba(25, 135, 84, 0.1);
+  --purchased-border: rgba(25, 135, 84, 0.3);
+  --just-moved-bg: rgba(0, 123, 255, 0.1);
+  
+  // Utility Variables
+  --border-radius: 0.375rem;
+  --border-radius-sm: 0.25rem;
+  --border-radius-lg: 0.5rem;
+  --transition-duration: 0.2s;
+  --transition-ease: ease-in-out;
+  --z-index-dragging: 1000;
+  --z-index-modal: 1050;
+  --z-index-tooltip: 1070;
+  
+  // Mobile Specific
+  --mobile-touch-target: 44px;
+  --mobile-spacing: 1rem;
+  --mobile-padding: 0.15rem;
+  
+  // Mobile Button Padding Variables - Zero padding for testing
+  --mobile-btn-padding-y: 0;
+  --mobile-btn-padding-x: 0;
+  --mobile-btn-sm-padding-y: 0;
+  --mobile-btn-sm-padding-x: 0;
+  --mobile-list-padding-y: 0.2rem;
+  --mobile-list-padding-x: 0.3rem;
+  --mobile-form-padding-y: 0.15rem;
+  --mobile-form-padding-x: 0.2rem;
+  
+  // Font Size Variables
+  // Base Desktop Sizes
+  --font-xs: 0.75rem;       // 12px
+  --font-sm: 0.875rem;      // 14px  
+  --font-base: 1rem;        // 16px
+  --font-lg: 1.125rem;      // 18px
+  --font-xl: 1.25rem;       // 20px
+  --font-2xl: 1.5rem;       // 24px
+  --font-3xl: 1.875rem;     // 30px
+  --font-4xl: 2.25rem;      // 36px
+  
+  // Component Specific Desktop Sizes
+  --font-card-title: 1.25rem;
+  --font-card-header: 1.35rem;
+  --font-list-item: 1.15rem;
+  --font-button: 1rem;
+  --font-button-sm: 0.875rem;
+  --font-badge: 0.875rem;
+  --font-form-control: 1rem;
+  --font-form-label: 1rem;
+  
+  // Mobile Font Sizes (for phones) - Much smaller sizes
+  --font-mobile-xs: 0.7rem;        // 11.2px
+  --font-mobile-sm: 0.75rem;       // 12px
+  --font-mobile-base: 0.8rem;      // 12.8px
+  --font-mobile-lg: 0.85rem;       // 13.6px
+  --font-mobile-xl: 0.9rem;        // 14.4px
+  --font-mobile-2xl: 0.95rem;      // 15.2px
+  --font-mobile-3xl: 1rem;         // 16px
+  --font-mobile-4xl: 1.05rem;      // 16.8px
+  
+  // Mobile Component Specific Sizes - Increased button font sizes
+  --font-mobile-card-title: 1rem;
+  --font-mobile-card-header: 1.1rem;
+  --font-mobile-list-item: 0.95rem;
+  --font-mobile-button: 1.1rem;
+  --font-mobile-button-sm: 1rem;
+  --font-mobile-badge: 0.9rem;
+  --font-mobile-form-control: 0.95rem;
+  --font-mobile-form-label: 0.9rem;
+  
+  // Super Small Mobile (under 400px) - Better button fonts with minimal padding
+  --font-small-card-title: 0.9rem;
+  --font-small-card-header: 1rem;
+  --font-small-list-item: 0.85rem;
+  --font-small-button: 1rem;
+  --font-small-button-sm: 0.9rem;
+  --font-small-badge: 0.8rem;
+  --font-small-form-control: 0.85rem;
+  --font-small-form-label: 0.8rem;
+  
+  // iPhone 12/13/14 Optimized (360px-430px) - Better button fonts
+  --font-iphone-card-title: 1rem;
+  --font-iphone-card-header: 1.1rem;
+  --font-iphone-list-item: 1.1rem;
+  --font-iphone-button: 1rem;
+  --font-iphone-button-sm: 0.95rem;
+  --font-iphone-badge: 0.75rem;
+  --font-iphone-form-control: 0.9rem;
+  --font-iphone-form-label: 0.85rem;
+}
+
+// Dark Theme Override
+[data-theme="dark"] {
+  // Dark Theme Backgrounds
+  --bg-primary: #1a1d23;
+  --bg-secondary: #212529;
+  --bg-tertiary: #2c3034;
+  --bg-card: #212529;
+  --bg-header: #1a1d23;
+  --bg-modal: #212529;
+  --bg-body: #1a1d23;
+  
+  // Dark Theme Text Colors
+  --text-primary: #ffffff;
+  --text-secondary: #adb5bd;
+  --text-muted: #6c757d;
+  --text-light: #495057;
+  
+  // Dark Theme Borders
+  --border-primary: #495057;
+  --border-secondary: #3d4449;
+  --border-light: #343a40;
+  --border-dark: #6c757d;
+  
+  // Dark Theme Shadows (more pronounced)
+  --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 0.5rem 1rem rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.5);
+  
+  // Adjusted theme colors for dark mode
+  --primary-light: rgba(0, 123, 255, 0.2);
+  --success-light: rgba(25, 135, 84, 0.2);
+  --warning-light: rgba(255, 193, 7, 0.2);
+  --danger-light: rgba(220, 53, 69, 0.2);
+  --info-light: rgba(13, 202, 240, 0.2);
+  
+  // Dark mode drag and drop
+  --drag-bg-over: rgba(0, 123, 255, 0.2);
+  --purchased-bg: rgba(25, 135, 84, 0.1);
+  --purchased-border: rgba(25, 135, 84, 0.2);
+  --just-moved-bg: rgba(0, 123, 255, 0.2);
+}
+
+// Color Mixins for SCSS (if needed)
+@mixin theme-transition {
+  transition: background-color var(--transition-duration) var(--transition-ease), 
+              color var(--transition-duration) var(--transition-ease), 
+              border-color var(--transition-duration) var(--transition-ease);
+}
+
+@mixin card-style {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-sm);
+  color: var(--text-primary);
+}
+
+@mixin button-primary {
+  background-color: var(--primary);
+  border-color: var(--primary);
+  color: var(--text-white);
+  
+  &:hover {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+  }
+}
+
+@mixin mobile-touch-target {
+  min-height: var(--mobile-touch-target);
+  min-width: var(--mobile-touch-target);
+  padding: var(--mobile-padding);
+}

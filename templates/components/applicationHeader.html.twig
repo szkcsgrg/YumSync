@@ -1,0 +1,59 @@
+{% block nav %}
+    <nav class="navbar navbar-expand-lg navbar-light" style="background-color: var(--bg-header); border-bottom: 1px solid var(--border-primary);">
+        <div class="container-fluid">
+            <div class="navbar-brand" style="color: var(--text-primary);">
+                🥘 YumSync
+            </div>
+            
+            <div class="navbar-nav ms-auto d-flex align-items-center">
+                <i class="fas fa-moon" id="manualThemeToggle" 
+                   style="font-size: 20px; cursor: pointer; margin-right: 15px; color: #333; transition: all 0.3s ease;"
+                   title="Toggle Dark/Light Mode"></i>
+
+                <div class="nav-item" style="color: var(--text-secondary);">
+                    <i class="fas fa-cog"></i>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const icon = document.getElementById('manualThemeToggle');
+        
+        if (!icon) return; // Safety check
+        
+        // Get saved theme
+        const savedTheme = localStorage.getItem('yumsync-theme') || 'light';
+        applyTheme(savedTheme);
+        
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                icon.className = 'fas fa-sun';
+                icon.title = 'Switch to Light Mode';
+                icon.style.color = '#ffffff';
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+                icon.className = 'fas fa-moon';
+                icon.title = 'Switch to Dark Mode';
+                icon.style.color = '#333';
+            }
+            localStorage.setItem('yumsync-theme', theme);
+            
+            // Add rotation animation
+            icon.style.transform = 'rotate(360deg)';
+            setTimeout(() => {
+                icon.style.transform = 'rotate(0deg)';
+            }, 300);
+        }
+        
+        icon.addEventListener('click', function() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            applyTheme(newTheme);
+        });
+    });
+    </script>
+{% endblock %}
+

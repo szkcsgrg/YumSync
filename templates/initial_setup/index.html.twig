@@ -1,0 +1,31 @@
+{# templates/initial_setup.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}YumSync - Initial Setup{% endblock %}
+
+{% block body %}
+<h2>Setup your favourite Shops</h2>
+
+<form method="POST" action="{{ path('initial_setup') }}">
+    <div id="store-fields">
+        <input type="text" name="stores[]" placeholder="Bolt neve" required>
+    </div>
+
+    <label for="stores">Add Further:</label>
+    <button type="button" id="add-store">+</button>
+    <br><br>
+    <button type="submit">Done</button>
+</form>
+
+<script>
+    document.getElementById('add-store').addEventListener('click', function () {
+        const container = document.getElementById('store-fields');
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.name = 'stores[]';
+        input.placeholder = 'Bolt neve';
+        container.appendChild(document.createElement('br'));
+        container.appendChild(input);
+    });
+</script>
+{% endblock %}
