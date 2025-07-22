@@ -18,4 +18,10 @@
 /public/assets/
 /assets/vendor/
 ###< symfony/asset-mapper ###
+
+# Environment files with sensitive data
 .env
+.env.dev
+.env.test
+.env.local
+.env.*.local
