@@ -5,14 +5,38 @@
                 🥘 YumSync
             </div>
             
-            <div class="navbar-nav ms-auto d-flex align-items-center">
-                <i class="fas fa-moon" id="manualThemeToggle" 
-                   style="font-size: 20px; cursor: pointer; margin-right: 15px; color: #333; transition: all 0.3s ease;"
-                   title="Toggle Dark/Light Mode"></i>
-
-                <div class="nav-item" style="color: var(--text-secondary);">
-                    <i class="fas fa-cog"></i>
+            <div class="navbar-nav ms-auto d-flex align-items-center justify-content-end flex-row gap-2">
+                {% if userHouseholdRole != 'member' %}
+                <div class="nav-item m-1">
+                    <i class="fas fa-store" id="shopSetupButton" 
+                       style="font-size: 1.43rem; cursor: pointer; transition: all 0.3s ease; color: var(--text-primary);"
+                       title="Manage Shops"
+                       data-bs-toggle="modal" 
+                       data-bs-target="#shopSetupModal"></i>
                 </div>
+                {% endif %}
+                <div class="nav-item m-1">
+                    <i class="fas fa-users" id="housholdMembersButton" 
+                       style="font-size: 1.43rem; cursor: pointer; transition: all 0.3s ease; color: var(--text-primary);"
+                       title="Household Management"></i>
+                </div>
+                <div class="nav-item m1">
+                    <i class="fas fa-moon" id="manualThemeToggle" 
+                   style="font-size: 1.43rem; cursor: pointer; transition: all 0.3s ease;"
+                   title="Toggle Dark/Light Mode"></i>
+                </div>
+                <div class="nav-item m-1">
+                    <i class="fas fa-user-circle" id="profileButton" 
+                       style="font-size: 1.43rem; cursor: pointer; transition: all 0.3s ease; color: var(--text-primary);"
+                       title="Account Settings"
+                       data-bs-toggle="modal" 
+                       data-bs-target="#profileModal"></i>
+                </div>
+                <!--
+                <div class="nav-item m1" style="">
+                    <i class="fas fa-cog" style="font-size: 1.43rem; cursor: pointer; transition: all 0.3s ease;"></i>
+                </div>
+                -->
             </div>
         </div>
     </nav>

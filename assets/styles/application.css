@@ -650,7 +650,6 @@ body.dragging-active .empty-state + .draggable-list:empty::after {
   }
   .form-control {
     font-size: var(--font-small-form-control) !important;
-    padding: 1rem 1.2rem !important;
   }
   .form-label {
     font-size: var(--font-small-form-label) !important;
@@ -750,9 +749,12 @@ body.dragging-active .empty-state + .draggable-list:empty::after {
   .badge {
     font-size: var(--font-iphone-badge) !important;
   }
-  .form-control {
+  .form-control, .form-select {
     font-size: var(--font-iphone-form-control) !important;
-    padding: 1.4rem 1.6rem !important;
+    padding: 1rem !important;
+  }
+  #addProductButton {
+    padding: 1rem !important;
   }
   .form-label {
     font-size: var(--font-iphone-form-label) !important;
@@ -761,11 +763,18 @@ body.dragging-active .empty-state + .draggable-list:empty::after {
   .btn {
     font-size: var(--font-iphone-button) !important;
   }
+  #decreaseAmountButton, #increaseAmountButton {
+    font-size: calc(var(--font-iphone-button) * 3) !important;
+    padding: 0.8rem 1.2rem !important;
+  }
   .modal-body {
     font-size: var(--font-iphone-button) !important;
   }
   .modal-title {
     font-size: var(--font-iphone-card-header) !important;
+  }
+  .input-group {
+    height: 15em;
   }
   .input-group .form-control {
     font-size: var(--font-iphone-form-control) !important;
@@ -847,7 +856,8 @@ body.dragging-active .empty-state + .draggable-list:empty::after {
     font-size: var(--font-mobile-button);
     padding: var(--mobile-btn-padding-y) var(--mobile-btn-padding-x);
   }
-  .input-group {
+  /* Only apply larger font size to modal quantity input group, not main add product input */
+  .modal .input-group:not(.input-group-lg) {
     font-size: var(--font-mobile-form-control);
   }
   /* Better touch targets on mobile */

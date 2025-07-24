@@ -23,6 +23,9 @@ class HouseholdUsers
     private ?string $role = null;
 
     #[ORM\Column(length: 255)]
+    private ?string $status = null;
+
+    #[ORM\Column(length: 255)]
     private ?string $joinedAt = null;
 
     public function getId(): ?int
@@ -62,6 +65,18 @@ class HouseholdUsers
     public function setRole(string $role): static
     {
         $this->role = $role;
+
+        return $this;
+    }
+
+    public function getStatus(): ?string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(string $status): static
+    {
+        $this->status = $status;
 
         return $this;
     }

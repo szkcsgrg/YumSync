@@ -4,20 +4,39 @@
 
 {% block body %}
 
-    {% include 'components/applicationHeader.html.twig' %}
+    {% include 'components/applicationHeader.html.twig' with {'userHouseholdRole': userHouseholdRole} %}
 
     <div class="container-fluid container-lg mt-4">
         <div class="row">
             <div class="col-md-12">
                 <p><strong>Welcome:</strong> {{ name }} ({{ email }})</p>
 
+                {% if requiresHousehold is defined and requiresHousehold %}
+                    <!-- Household Required Message -->
+                    <div class="alert alert-warning" role="alert">
+                        <h4 class="alert-heading"><i class="fas fa-home me-2"></i>Household Required</h4>
+                        <p>{{ message }}</p>
+                        <hr>
+                        <p class="mb-0">
+                            <strong>Options:</strong>
+                            <br>• Create your own household and invite family members
+                            <br>• Ask a family member to invite you to their existing household
+                        </p>
+                    </div>
+                    
+                    <div class="text-center">
+                        <p class="text-muted">Once you're part of a household, you'll be able to manage shopping lists and collaborate with your family members.</p>
+                    </div>
+                {% else %}
+                    <!-- Normal Application Content -->
+
                 <!-- Product Input Section -->
                 <div class="card mb-4">
                     <div class="card-body">
                         <h5 class="card-title">Add New Product</h5>
-                        <div class="input-group">
+                        <div class="d-flex justify-content-center align-items-center gap-1">
                             <input type="text" class="form-control" id="productInput" placeholder="Enter product name">
-                            <button class="btn btn-primary" type="button" id="addProductButton" data-bs-toggle="modal" data-bs-target="#productModal">
+                            <button class="btn btn-primary text-nowrap" type="button" id="addProductButton" data-bs-toggle="modal" data-bs-target="#productModal">
                                 Add Product
                             </button>
                         </div>
@@ -113,7 +132,7 @@
                                                     <i class="fas fa-check-circle me-1"></i>Purchased Items ({{ shopList.purchasedItems|length }})
                                                 </h6>
                                                 {% if shopList.purchasedItems %}
-                                                    <div class="btn-group" role="group">
+                                                    <div class="btn-group gap-2" role="group">
                                                         <button class="btn btn-sm btn-outline-success revert-all-btn" 
                                                                 data-shop-id="{{ shopList.shop.shopId }}"
                                                                 title="Move all purchased items back to shopping list">
@@ -162,8 +181,10 @@
                                 <div class="card-body text-center">
                                     <i class="fas fa-info-circle fa-2x text-info mb-3"></i>
                                     <h5>No shops found</h5>
-                                    <p class="text-muted">You need to set up shops first in your initial setup.</p>
-                                    <a href="{{ path('initial_setup') }}" class="btn btn-primary">Go to Setup</a>
+                                    <p class="text-muted">You need to set up shops first to start creating shopping lists.</p>
+                                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#shopSetupModal">
+                                        Setup Shops
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -181,28 +202,28 @@
                     <h5 class="modal-title" id="productModalLabel">Add Product to List</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body d-flex justify-content-center align-items-center flex-column">
                     <!-- Hidden field to store item ID for editing -->
                     <input type="hidden" id="editItemId" value="">
                     
                     <!-- Product Name Input -->
-                    <div class="mb-3">
+                    <div class="col-12 col-md-10 mb-3">
                         <label for="newProductName" class="form-label">Product Name</label>
                         <input type="text" class="form-control" id="newProductName" placeholder="Enter product name">
                     </div>
                     
                     <!-- Amount Controls -->
-                    <div class="mb-3">
+                    <div class="col-12 col-md-10 mb-3">
                         <label class="form-label">Quantity</label>
-                        <div class="input-group" style="max-width: 150px;">
-                            <button class="btn btn-outline-secondary" type="button" id="decreaseAmountButton">-</button>
-                            <input type="text" class="form-control text-center" id="productAmount" value="1">
-                            <button class="btn btn-outline-secondary" type="button" id="increaseAmountButton">+</button>
+                        <div class="input-group input-group-lg d-flex justify-content-center gap-3" style="height: 80px;">
+                            <button class="btn btn-outline-secondary col-3 fs-3" type="button" id="decreaseAmountButton" style="height: 80px; line-height: 1;">-</button>
+                            <input type="text" class="form-control text-center fs-2 fw-bold" id="productAmount" value="1" style="height: 80px; line-height: 80px;">
+                            <button class="btn btn-outline-secondary col-3 fs-3" type="button" id="increaseAmountButton" style="height: 80px; line-height: 1;">+</button>
                         </div>
                     </div>
 
                     <!-- Shop Selection -->
-                    <div class="mb-3">
+                    <div class="col-12 col-md-10 mb-3">
                         <label for="shopSelect" class="form-label">Choose Shop</label>
                         <select class="form-select" id="shopSelect">
                             <option value="">Select a shop...</option>
@@ -224,6 +245,334 @@
                             <span id="addButtonText">Add to List</span>
                             <span id="addButtonSpinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
                         </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shop Setup Modal -->
+    <div class="modal fade" id="shopSetupModal" tabindex="-1" aria-labelledby="shopSetupModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="shopSetupModalLabel">Setup Your Shops</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-12 mb-4">
+                            <h6><i class="fas fa-store me-2"></i>Add Your Preferred Shops</h6>
+                            <p class="text-muted">Add the shops where you usually do your grocery shopping. These will become your shopping lists.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Shop Input Form -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="row align-items-end">
+                                        <div class="col-md-8 mb-3">
+                                            <label for="newShopName" class="form-label">Shop Name</label>
+                                            <input type="text" class="form-control" id="newShopName" placeholder="Enter shop name (e.g., Walmart, Target, etc.)">
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <button class="btn btn-primary w-100" onclick="addShopToList()">
+                                                <i class="fas fa-plus me-1"></i>Add Shop
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Current Shops List -->
+                    <div class="row">
+                        <div class="col-12">
+                            <h6>Your Shops:</h6>
+                            <div id="shopsList" class="border rounded p-3" style="background-color: var(--bg-secondary);">
+                                <div id="noShopsMessage" class="text-center text-muted py-3">
+                                    <i class="fas fa-store fa-2x mb-2"></i>
+                                    <p class="mb-0">No shops added yet. Add your first shop above!</p>
+                                </div>
+                                <div id="shopsContainer" class="d-none">
+                                    <!-- Shops will be added here dynamically -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Location Settings -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="mb-0">Location Settings</h6>
+                                <button type="button" class="btn btn-link btn-sm p-0" onclick="toggleLocationSettings()">
+                                    <i class="fas fa-cog"></i> <small>Adjust</small>
+                                </button>
+                            </div>
+                            <div id="locationInfo" class="small text-muted mb-2">
+                                <i class="fas fa-map-marker-alt me-1"></i>
+                                <span id="currentLocation">Detecting location...</span>
+                            </div>
+                            <div id="locationSettingsForm" class="d-none">
+                                <div class="row g-2">
+                                    <div class="col-md-4">
+                                        <input type="text" class="form-control form-control-sm" id="countryCodeInput" placeholder="Country Code (e.g., HU)" maxlength="2">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="text" class="form-control form-control-sm" id="countryInput" placeholder="Country">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="text" class="form-control form-control-sm" id="regionInput" placeholder="Region/State">
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <button type="button" class="btn btn-success btn-sm" onclick="saveLocationSettings()">
+                                        <i class="fas fa-save me-1"></i>Save Location
+                                    </button>
+                                    <button type="button" class="btn btn-secondary btn-sm" onclick="toggleLocationSettings()">Cancel</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="me-auto">
+                        <button type="button" class="btn btn-outline-secondary" onclick="addSampleShops()" id="addSampleShopsBtn">
+                            <i class="fas fa-magic me-1"></i>Add Regional Shops
+                        </button>
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-success" onclick="saveShops()" id="saveShopsBtn">
+                            <span id="saveShopsText">Save Shops</span>
+                            <span id="saveShopsSpinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Household Management Modal -->
+    <div class="modal fade" id="householdModal" tabindex="-1" aria-labelledby="householdModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="householdModalLabel">Household Management</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Current Household Display -->
+                    <div id="currentHouseholdSection" class="d-none mb-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <i class="fas fa-home me-2"></i>Your Household
+                                </h6>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong id="currentHouseholdName"></strong>
+                                        <br>
+                                        <small class="text-muted">
+                                            ID: <span id="currentHouseholdId"></span> 
+                                            <button class="btn btn-sm btn-outline-secondary ms-1" onclick="copyHouseholdId()" title="Copy ID">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
+                                        </small>
+                                        <br>
+                                        <small class="text-muted">Role: <span id="currentHouseholdRole"></span></small>
+                                    </div>
+                                    <div id="leaveHouseholdButtonContainer" class="d-none">
+                                        <button class="btn btn-sm btn-outline-danger" onclick="leaveHousehold()" title="Leave Household">
+                                            <i class="fas fa-sign-out-alt me-1"></i>Leave
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Member Management Section (for owners) -->
+                    <div id="memberManagementSection" class="d-none mb-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <i class="fas fa-users me-2"></i>Household Members
+                                </h6>
+                                <div id="membersList">
+                                    <!-- Members will be loaded here -->
+                                </div>
+                                <button class="btn btn-sm btn-outline-primary mt-2" onclick="loadHouseholdMembers()">
+                                    <i class="fas fa-sync-alt me-1"></i>Refresh Members
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pending Requests Section (for owners) -->
+                    <div id="pendingRequestsSection" class="d-none mb-4">
+                        <h6><i class="fas fa-clock me-2"></i>Pending Join Requests</h6>
+                        <div id="pendingRequestsList"></div>
+                    </div>
+
+                    <!-- Danger Zone - Delete Household (for owners only) -->
+                    <div id="deleteHouseholdSection" class="d-none mb-4">
+                        <div class="card border-danger">
+                            <div class="card-header bg-danger text-white">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>Danger Zone
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <h6 class="text-danger">Delete Household</h6>
+                                <p class="text-muted small mb-3">
+                                    <strong>Warning:</strong> This action cannot be undone. Deleting your household will:
+                                </p>
+                                <ul class="text-muted small mb-3">
+                                    <li>Remove all shopping lists and items</li>
+                                    <li>Remove all household members</li>
+                                    <li>Delete the household permanently</li>
+                                </ul>
+                                <button class="btn btn-danger btn-sm" onclick="confirmDeleteHousehold()">
+                                    <i class="fas fa-trash me-1"></i>Delete Household
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Create/Join Options -->
+                    <div id="householdOptionsSection">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-plus-circle fa-3x text-primary mb-3"></i>
+                                        <h6>Create New Household</h6>
+                                        <p class="text-muted small">Start a new household and invite family members</p>
+                                        <button class="btn btn-primary" onclick="showCreateForm()">Create Household</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-sign-in-alt fa-3x text-success mb-3"></i>
+                                        <h6>Join Existing Household</h6>
+                                        <p class="text-muted small">Enter a household ID to request to join</p>
+                                        <button class="btn btn-success" onclick="showJoinForm()">Join Household</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Create Household Form -->
+                    <div id="createHouseholdForm" class="d-none">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6><i class="fas fa-home me-2"></i>Create New Household</h6>
+                                <div class="mb-3">
+                                    <label for="newHouseholdName" class="form-label">Household Name</label>
+                                    <input type="text" class="form-control" id="newHouseholdName" placeholder="Enter household name (e.g., Smith Family)">
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-primary" onclick="createHousehold()">
+                                        <span id="createButtonText">Create Household</span>
+                                        <span id="createButtonSpinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
+                                    </button>
+                                    <button class="btn btn-secondary" onclick="hideCreateForm()">Cancel</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Join Household Form -->
+                    <div id="joinHouseholdForm" class="d-none">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6><i class="fas fa-sign-in-alt me-2"></i>Join Existing Household</h6>
+                                <div class="mb-3">
+                                    <label for="householdIdInput" class="form-label">Household ID</label>
+                                    <input type="text" class="form-control" id="householdIdInput" placeholder="Enter 6-digit household ID">
+                                    <div class="form-text">Ask the household owner for their household ID</div>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-success" onclick="requestJoinHousehold()">
+                                        <span id="joinButtonText">Send Join Request</span>
+                                        <span id="joinButtonSpinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
+                                    </button>
+                                    <button class="btn btn-secondary" onclick="hideJoinForm()">Cancel</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Management Modal -->
+    <div class="modal fade" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="profileModalLabel">Account Settings</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Account Information -->
+                    <div class="mb-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <i class="fas fa-user me-2"></i>Account Information
+                                </h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <strong>Name:</strong> {{ name }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Email:</strong> {{ email }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Danger Zone - Delete Profile -->
+                    <div class="mb-4">
+                        <div class="card border-danger">
+                            <div class="card-header bg-danger text-white">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>Danger Zone
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <h6 class="text-danger">Delete Account</h6>
+                                <p class="text-muted small mb-3">
+                                    <strong>Warning:</strong> This action cannot be undone. Deleting your account will:
+                                </p>
+                                <ul class="text-muted small mb-3">
+                                    <li>Delete all your shopping lists and items</li>
+                                    <li>Delete all shops you created</li>
+                                    <li>Remove you from all households</li>
+                                    <li>Delete any households you own (including all members and data)</li>
+                                    <li>Permanently delete your account</li>
+                                </ul>
+                                <button class="btn btn-danger btn-sm" onclick="confirmDeleteProfile()">
+                                    <i class="fas fa-user-times me-1"></i>Delete My Account
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -254,6 +603,61 @@
             const deleteProductBtn = document.getElementById('deleteProductButton');
 
             let isEditMode = false;
+
+            // =========================
+            // INITIALIZE DRAG AND DROP
+            // =========================
+            
+            // Initialize drag and drop functionality for the application
+            initializeDragAndDrop();
+            
+            // =========================
+            // HOUSEHOLD MANAGEMENT
+            // =========================
+            
+            // Global household data
+            let currentHousehold = null;
+
+            // Initialize household management
+            async function initializeHousehold() {
+                await window.loadCurrentHousehold();
+                await window.loadPendingRequests();
+            }
+
+            // Load current household info
+            window.loadCurrentHousehold = async function() {
+                try {
+                    const timestamp = Date.now();
+                    const response = await fetch(`/api/household/my-household?_t=${timestamp}`);
+                    const result = await response.json();
+                    
+                    if (result.success && result.household) {
+                        window.currentHousehold = result.household;
+                        window.showCurrentHousehold(result.household);
+                    } else {
+                        window.showHouseholdOptions();
+                    }
+                } catch (error) {
+                    console.error('Error loading household:', error);
+                    window.showHouseholdOptions();
+                }
+            };
+
+            // Show household creation/join options
+            window.showHouseholdOptions = function() {
+                document.getElementById('currentHouseholdSection').classList.add('d-none');
+                document.getElementById('householdOptionsSection').classList.remove('d-none');
+                document.getElementById('pendingRequestsSection').classList.add('d-none');
+            };
+
+            // Add household button click listener
+            document.getElementById('housholdMembersButton').addEventListener('click', function() {
+                const modal = new bootstrap.Modal(document.getElementById('householdModal'));
+                modal.show();
+                
+                // Reload household data when modal opens
+                initializeHousehold();
+            });
 
             // =========================
             // MOBILE COLLAPSE STATE MANAGEMENT
@@ -661,19 +1065,22 @@
                     return;
                 }
                 
-                if (confirm(`Are you sure you want to delete "${productName}"?`)) {
-                    try {
-                        const response = await fetch(`/api/remove-product/${itemId}`, {
-                            method: 'DELETE'
-                        });
+                window.showConfirmation(
+                    'Delete Product',
+                    `Are you sure you want to delete "<strong>${productName}</strong>"?`,
+                    async function() {
+                        try {
+                            const response = await fetch(`/api/remove-product/${itemId}`, {
+                                method: 'DELETE'
+                            });
 
-                        const result = await response.json();
-                        
-                        console.log('Delete product API response:', result);
+                            const result = await response.json();
+                            
+                            console.log('Delete product API response:', result);
 
-                        if (response.ok && result.success) {
-                            // Clear form and close modal
-                            productInput.value = '';
+                            if (response.ok && result.success) {
+                                // Clear form and close modal
+                                productInput.value = '';
                             newProductName.value = '';
                             productAmount.value = 1;
                             shopSelect.value = '';
@@ -707,14 +1114,13 @@
                         } else {
                             showAlert(result.error || 'Failed to delete product', 'danger');
                         }
-                    } catch (error) {
-                        console.error('Error deleting product:', error);
-                        showAlert('Network error. Please try again.', 'danger');
+                        } catch (error) {
+                            console.error('Error deleting product:', error);
+                            showAlert('Network error. Please try again.', 'danger');
+                        }
                     }
-                }
-            });
-
-            // Handle remove item buttons
+                );
+            });            // Handle remove item buttons
             document.addEventListener('click', async function(e) {
                 if (e.target.closest('.remove-item-btn')) {
                     const button = e.target.closest('.remove-item-btn');
@@ -722,21 +1128,24 @@
                     
                     console.log('Attempting to delete item with ID:', itemId);
                     
-                    if (confirm('Are you sure you want to permanently remove this item?')) {
-                        try {
-                            const response = await fetch(`/api/remove-product/${itemId}`, {
-                                method: 'DELETE'
-                            });
+                    window.showConfirmation(
+                        'Remove Item',
+                        'Are you sure you want to permanently remove this item?',
+                        async function() {
+                            try {
+                                const response = await fetch(`/api/remove-product/${itemId}`, {
+                                    method: 'DELETE'
+                                });
 
-                            const result = await response.json();
-                            
-                            console.log('Delete API response:', result);
-
-                            if (response.ok && result.success) {
-                                // Find and remove item from UI
-                                const listItem = document.querySelector(`[data-item-id="${itemId}"]`);
+                                const result = await response.json();
                                 
-                                console.log('Found list item to remove:', listItem);
+                                console.log('Delete API response:', result);
+
+                                if (response.ok && result.success) {
+                                    // Find and remove item from UI
+                                    const listItem = document.querySelector(`[data-item-id="${itemId}"]`);
+                                    
+                                    console.log('Found list item to remove:', listItem);
                                 
                                 if (listItem) {
                                     // Get the shop list before removing the item
@@ -777,6 +1186,7 @@
                             showAlert('Network error. Please try again.', 'danger');
                         }
                     }
+                );
                 }
             });
 
@@ -850,13 +1260,16 @@
                     
                     console.log('Attempting to delete all purchased items for shop ID:', shopId);
                     
-                    if (confirm('Are you sure you want to permanently delete all purchased items for this shop?')) {
-                        try {
-                            const response = await fetch(`/api/delete-purchased-items/${shopId}`, {
-                                method: 'DELETE'
-                            });
+                    window.showConfirmation(
+                        'Delete All Purchased Items',
+                        'Are you sure you want to permanently delete all purchased items for this shop?',
+                        async function() {
+                            try {
+                                const response = await fetch(`/api/delete-purchased-items/${shopId}`, {
+                                    method: 'DELETE'
+                                });
 
-                            const result = await response.json();
+                                const result = await response.json();
                             
                             console.log('Delete purchased items API response:', result);
 
@@ -877,6 +1290,7 @@
                             showAlert('Network error. Please try again.', 'danger');
                         }
                     }
+                );
                 }
             });
 
@@ -888,17 +1302,20 @@
                     
                     console.log('Attempting to revert all purchased items for shop ID:', shopId);
                     
-                    if (confirm('Are you sure you want to move all purchased items back to the shopping list?')) {
-                        try {
-                            const response = await fetch(`/api/revert-purchased-items/${shopId}`, {
-                                method: 'PUT'
-                            });
+                    window.showConfirmation(
+                        'Revert All Items',
+                        'Are you sure you want to move all purchased items back to the shopping list?',
+                        async function() {
+                            try {
+                                const response = await fetch(`/api/revert-purchased-items/${shopId}`, {
+                                    method: 'PUT'
+                                });
 
-                            const result = await response.json();
-                            
-                            console.log('Revert purchased items API response:', result);
+                                const result = await response.json();
+                                
+                                console.log('Revert purchased items API response:', result);
 
-                            if (response.ok && result.success) {
+                                if (response.ok && result.success) {
                                 // Save collapse state before reload
                                 saveStateBeforeReload();
                                 
@@ -915,512 +1332,9 @@
                             showAlert('Network error. Please try again.', 'danger');
                         }
                     }
+                );
                 }
             });
-
-            // =========================
-            // DRAG AND DROP FUNCTIONALITY
-            // =========================
-            
-            let draggedElement = null;
-            let draggedElementData = null;
-            let touchStartY = 0;
-            let touchStartX = 0;
-            let isDragging = false;
-            let placeholder = null;
-
-            // Initialize drag and drop
-            function initializeDragAndDrop() {
-                // Check if we're on mobile (touch device)
-                const isMobile = window.innerWidth <= 991.98;
-                
-                // Add event listeners to all draggable items
-                document.querySelectorAll('.draggable-item').forEach(item => {
-                    if (!isMobile) {
-                        // Desktop drag events only
-                        item.addEventListener('dragstart', handleDragStart);
-                        item.addEventListener('dragend', handleDragEnd);
-                        
-                        // Ensure draggable attribute is set on desktop
-                        item.setAttribute('draggable', 'true');
-                    } else {
-                        // On mobile, disable drag completely
-                        item.setAttribute('draggable', 'false');
-                        item.removeAttribute('draggable');
-                    }
-                });
-
-                if (!isMobile) {
-                    // Add event listeners to all drop zones (including empty lists) - desktop only
-                    document.querySelectorAll('.draggable-list').forEach(zone => {
-                        zone.addEventListener('dragover', handleDragOver);
-                        zone.addEventListener('drop', handleDrop);
-                        zone.addEventListener('dragenter', handleDragEnter);
-                        zone.addEventListener('dragleave', handleDragLeave);
-                    });
-                    
-                    // Also add listeners to card bodies for empty shops - desktop only
-                    document.querySelectorAll('.card-body').forEach(zone => {
-                        zone.addEventListener('dragover', handleDragOver);
-                        zone.addEventListener('drop', handleDrop);
-                        zone.addEventListener('dragenter', handleDragEnter);
-                        zone.addEventListener('dragleave', handleDragLeave);
-                    });
-                }
-            }
-
-            // Desktop Drag Events
-            function handleDragStart(e) {
-                // Prevent this drag event from propagating to parent shop card
-                e.stopPropagation();
-                
-                // Ensure the parent shop card is not draggable when dragging list items
-                const shopCard = e.target.closest('.shop-card-container');
-                if (shopCard) {
-                    shopCard.setAttribute('draggable', 'false');
-                    shopCard.classList.remove('header-dragging');
-                }
-                
-                draggedElement = e.target;
-                draggedElementData = {
-                    itemId: draggedElement.dataset.itemId,
-                    itemName: draggedElement.dataset.itemName,
-                    itemQuantity: draggedElement.dataset.itemQuantity,
-                    currentShopId: draggedElement.dataset.itemShopId,
-                    isPurchased: draggedElement.dataset.purchased === 'true'
-                };
-                
-                draggedElement.classList.add('dragging');
-                document.body.classList.add('dragging-active');
-                e.dataTransfer.effectAllowed = 'move';
-                e.dataTransfer.setData('text/html', e.target.outerHTML);
-                
-                console.log('Drag started:', draggedElementData);
-            }
-
-            function handleDragEnd(e) {
-                e.target.classList.remove('dragging');
-                document.body.classList.remove('dragging-active');
-                clearAllDragStyles();
-                draggedElement = null;
-                draggedElementData = null;
-            }
-
-            function handleDragEnter(e) {
-                e.preventDefault();
-                
-                // Handle drop zones
-                const list = e.target.closest('.draggable-list');
-                const cardBody = e.target.closest('.card-body');
-                
-                if (list) {
-                    list.classList.add('drag-over');
-                } else if (cardBody && !cardBody.querySelector('.draggable-list')) {
-                    // This is an empty card body, highlight the card
-                    const card = cardBody.closest('.card');
-                    if (card) {
-                        card.classList.add('drag-target');
-                    }
-                }
-            }
-
-            function handleDragLeave(e) {
-                // Only remove highlight if we're actually leaving the element
-                if (!e.currentTarget.contains(e.relatedTarget)) {
-                    if (e.target.classList.contains('draggable-list')) {
-                        e.target.classList.remove('drag-over');
-                    }
-                    
-                    const card = e.target.closest('.card');
-                    if (card) {
-                        card.classList.remove('drag-target');
-                    }
-                }
-            }
-
-            function handleDragOver(e) {
-                e.preventDefault();
-                e.dataTransfer.dropEffect = 'move';
-                
-                const list = e.target.closest('.draggable-list');
-                const cardBody = e.target.closest('.card-body');
-                
-                if (list) {
-                    // Clear any existing placeholders
-                    removePlaceholder();
-                    
-                    // Add placeholder to show where the item will be dropped
-                    const afterElement = getDragAfterElement(list, e.clientY);
-                    if (afterElement == null) {
-                        list.appendChild(createPlaceholder());
-                    } else {
-                        list.insertBefore(createPlaceholder(), afterElement);
-                    }
-                } else if (cardBody && !cardBody.querySelector('.draggable-list')) {
-                    // This is an empty card, we can drop here
-                    const card = cardBody.closest('.card');
-                    if (card) {
-                        card.classList.add('drag-target');
-                    }
-                }
-            }
-
-            function handleDrop(e) {
-                e.preventDefault();
-                
-                let dropZone = e.target.closest('.draggable-list');
-                let targetShopId = null;
-                let isPurchasedSection = false;
-                let insertPosition = null;
-                
-                if (dropZone) {
-                    // Dropped on an existing list
-                    targetShopId = dropZone.dataset.shopId;
-                    isPurchasedSection = dropZone.dataset.purchasedSection === 'true';
-                    
-                    // Check if we need to handle reordering within the same list
-                    if (parseInt(targetShopId) === parseInt(draggedElementData.currentShopId) && 
-                        isPurchasedSection === draggedElementData.isPurchased) {
-                        
-                        // This is a reorder within the same list
-                        console.log('Reordering within same list');
-                        
-                        // Find where to insert based on the placeholder position
-                        const placeholder = dropZone.querySelector('.drag-placeholder');
-                        if (placeholder) {
-                            // Get all items in the list (excluding the dragged item and placeholder)
-                            const allItems = [...dropZone.querySelectorAll('.draggable-item:not(.dragging)')];
-                            insertPosition = allItems.findIndex(item => item.nextSibling === placeholder);
-                            if (insertPosition === -1) {
-                                insertPosition = allItems.length; // Insert at end
-                            }
-                            console.log('Insert position:', insertPosition);
-                            
-                            // Perform the reorder in the UI immediately
-                            handleReorderInSameList(draggedElement, dropZone, placeholder);
-                        }
-                        
-                        clearAllDragStyles();
-                        removePlaceholder();
-                        return; // Don't proceed with API calls for same-list reordering
-                    }
-                } else {
-                    // Check if dropped on empty card body
-                    const cardBody = e.target.closest('.card-body');
-                    if (cardBody) {
-                        const card = cardBody.closest('.card');
-                        const shopHeader = card?.querySelector('.card-header h5');
-                        
-                        if (shopHeader) {
-                            // Extract shop ID from existing lists in other cards or find by shop name
-                            const allShopCards = document.querySelectorAll('.card');
-                            for (const shopCard of allShopCards) {
-                                if (shopCard === card) {
-                                    // Find shop ID from header or existing list
-                                    const existingList = shopCard.querySelector('[data-shop-id]');
-                                    if (existingList) {
-                                        targetShopId = existingList.dataset.shopId;
-                                        break;
-                                    } else {
-                                        // This is an empty card, we need to get shop ID from other cards with same name
-                                        const headerText = shopHeader.textContent.replace(/^\s*[^\w]*\s*/, '').trim();
-                                        for (const otherCard of allShopCards) {
-                                            const otherList = otherCard.querySelector('[data-shop-id]');
-                                            const otherHeader = otherCard.querySelector('.card-header h5');
-                                            if (otherList && otherHeader) {
-                                                const otherHeaderText = otherHeader.textContent.replace(/^\s*[^\w]*\s*/, '').trim();
-                                                if (otherHeaderText === headerText) {
-                                                    targetShopId = otherList.dataset.shopId;
-                                                    break;
-                                                }
-                                            }
-                                        }
-                                    }
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                if (targetShopId && draggedElement && draggedElementData) {
-                    console.log('Drop event:', {
-                        targetShopId,
-                        isPurchasedSection,
-                        draggedData: draggedElementData
-                    });
-                    
-                    // Handle the drop (shop or purchase status change)
-                    handleItemMove(
-                        draggedElementData.itemId,
-                        targetShopId,
-                        isPurchasedSection
-                    );
-                } else {
-                    console.log('Drop failed - no valid target found');
-                }
-                
-                clearAllDragStyles();
-                removePlaceholder();
-            }
-
-            // Touch Events for Mobile
-            function handleTouchStart(e) {
-                if (e.target.closest('.btn') || e.target.closest('button')) return; // Don't drag buttons
-                
-                const touch = e.touches[0];
-                touchStartY = touch.clientY;
-                touchStartX = touch.clientX;
-                isDragging = false;
-                
-                setTimeout(() => {
-                    if (!isDragging) {
-                        draggedElement = e.target.closest('.draggable-item');
-                        if (draggedElement) {
-                            draggedElementData = {
-                                itemId: draggedElement.dataset.itemId,
-                                itemName: draggedElement.dataset.itemName,
-                                itemQuantity: draggedElement.dataset.itemQuantity,
-                                currentShopId: draggedElement.dataset.itemShopId,
-                                isPurchased: draggedElement.dataset.purchased === 'true'
-                            };
-                            draggedElement.classList.add('dragging');
-                            document.body.classList.add('dragging-active');
-                            isDragging = true;
-                            console.log('Touch drag started:', draggedElementData);
-                        }
-                    }
-                }, 200);
-            }
-
-            function handleTouchMove(e) {
-                if (!isDragging || !draggedElement) return;
-                
-                e.preventDefault();
-                const touch = e.touches[0];
-                const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
-                
-                // Clear previous highlights
-                clearAllDragStyles();
-                
-                // Find drop zone
-                const dropList = elementBelow?.closest('.draggable-list');
-                const cardBody = elementBelow?.closest('.card-body');
-                
-                if (dropList) {
-                    dropList.classList.add('drag-over');
-                } else if (cardBody && !cardBody.querySelector('.draggable-list')) {
-                    const card = cardBody.closest('.card');
-                    if (card) {
-                        card.classList.add('drag-target');
-                    }
-                }
-            }
-
-            function handleTouchEnd(e) {
-                if (!isDragging || !draggedElement) return;
-                
-                const touch = e.changedTouches[0];
-                const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
-                
-                let targetShopId = null;
-                let isPurchasedSection = false;
-                
-                // Find drop target
-                const dropList = elementBelow?.closest('.draggable-list');
-                if (dropList) {
-                    targetShopId = dropList.dataset.shopId;
-                    isPurchasedSection = dropList.dataset.purchasedSection === 'true';
-                    
-                    // Check if this is a reorder within the same list
-                    if (parseInt(targetShopId) === parseInt(draggedElementData.currentShopId) && 
-                        isPurchasedSection === draggedElementData.isPurchased) {
-                        
-                        console.log('Touch reordering within same list');
-                        
-                        // For touch, we'll insert based on the touch position
-                        const dropListRect = dropList.getBoundingClientRect();
-                        const touchY = touch.clientY - dropListRect.top;
-                        
-                        // Find the best insertion point
-                        const allItems = [...dropList.querySelectorAll('.draggable-item:not(.dragging)')];
-                        let insertBefore = null;
-                        
-                        for (const item of allItems) {
-                            const itemRect = item.getBoundingClientRect();
-                            const itemY = itemRect.top - dropListRect.top + itemRect.height / 2;
-                            if (touchY < itemY) {
-                                insertBefore = item;
-                                break;
-                            }
-                        }
-                        
-                        // Perform the reorder
-                        if (insertBefore) {
-                            dropList.insertBefore(draggedElement, insertBefore);
-                        } else {
-                            dropList.appendChild(draggedElement);
-                        }
-                        
-                        // Show visual feedback with CSS class
-                        draggedElement.classList.add('just-moved');
-                        
-                        setTimeout(() => {
-                            draggedElement.classList.remove('just-moved');
-                        }, 600);
-                        
-                        // Reset states and return early
-                        clearAllDragStyles();
-                        document.body.classList.remove('dragging-active');
-                        if (draggedElement) {
-                            draggedElement.classList.remove('dragging');
-                        }
-                        draggedElement = null;
-                        draggedElementData = null;
-                        isDragging = false;
-                        return;
-                    }
-                } else {
-                    const cardBody = elementBelow?.closest('.card-body');
-                    if (cardBody) {
-                        const card = cardBody.closest('.card');
-                        const existingList = card?.querySelector('[data-shop-id]');
-                        if (existingList) {
-                            targetShopId = existingList.dataset.shopId;
-                        }
-                    }
-                }
-                
-                if (targetShopId && draggedElementData) {
-                    console.log('Touch drop event:', {
-                        targetShopId,
-                        isPurchasedSection,
-                        draggedData: draggedElementData
-                    });
-                    
-                    // Handle the drop
-                    handleItemMove(
-                        draggedElementData.itemId,
-                        targetShopId,
-                        isPurchasedSection
-                    );
-                }
-                
-                // Reset states
-                clearAllDragStyles();
-                document.body.classList.remove('dragging-active');
-                if (draggedElement) {
-                    draggedElement.classList.remove('dragging');
-                }
-                draggedElement = null;
-                draggedElementData = null;
-                isDragging = false;
-            }
-
-            // Helper Functions
-            function getDragAfterElement(container, y) {
-                const draggableElements = [...container.querySelectorAll('.draggable-item:not(.dragging)')];
-                
-                return draggableElements.reduce((closest, child) => {
-                    const box = child.getBoundingClientRect();
-                    const offset = y - box.top - box.height / 2;
-                    
-                    if (offset < 0 && offset > closest.offset) {
-                        return { offset: offset, element: child };
-                    } else {
-                        return closest;
-                    }
-                }, { offset: Number.NEGATIVE_INFINITY }).element;
-            }
-
-            function createPlaceholder() {
-                if (!placeholder) {
-                    placeholder = document.createElement('div');
-                    placeholder.className = 'drag-placeholder';
-                }
-                return placeholder;
-            }
-
-            function removePlaceholder() {
-                if (placeholder && placeholder.parentNode) {
-                    placeholder.parentNode.removeChild(placeholder);
-                }
-                placeholder = null;
-            }
-
-            function clearAllDragStyles() {
-                document.querySelectorAll('.drag-over').forEach(el => {
-                    el.classList.remove('drag-over');
-                });
-                document.querySelectorAll('.drag-target').forEach(el => {
-                    el.classList.remove('drag-target');
-                });
-                removePlaceholder();
-            }
-
-            // Handle reordering within the same list
-            function handleReorderInSameList(draggedElement, dropZone, placeholder) {
-                console.log('Handling reorder in same list');
-                
-                // Remove the dragged element from its current position
-                const originalParent = draggedElement.parentNode;
-                const originalNextSibling = draggedElement.nextSibling;
-                
-                // Insert the element at the new position (where the placeholder is)
-                if (placeholder && placeholder.parentNode) {
-                    placeholder.parentNode.insertBefore(draggedElement, placeholder);
-                    console.log('Element moved to new position');
-                } else {
-                    // If no placeholder, append to end
-                    dropZone.appendChild(draggedElement);
-                    console.log('Element moved to end of list');
-                }
-                
-                // Show visual feedback with CSS class
-                draggedElement.classList.add('just-moved');
-                
-                setTimeout(() => {
-                    draggedElement.classList.remove('just-moved');
-                }, 600);
-                
-                console.log('Reorder completed in UI');
-            }
-
-            // Handle item move between lists or within list
-            async function handleItemMove(itemId, targetShopId, isPurchasedSection = false) {
-                console.log('Moving item:', itemId, 'to shop:', targetShopId, 'purchased:', isPurchasedSection);
-                
-                try {
-                    const response = await fetch('/api/move-item', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            itemId: itemId,
-                            targetShopId: targetShopId,
-                            isPurchased: isPurchasedSection
-                        })
-                    });
-
-                    const result = await response.json();
-                    
-                    if (response.ok && result.success) {
-                        console.log('Item moved successfully');
-                        // Reload the page to reflect changes
-                        window.location.reload();
-                    } else {
-                        console.error('Failed to move item:', result.message || 'Unknown error');
-                        alert('Failed to move item: ' + (result.message || 'Unknown error'));
-                    }
-                } catch (error) {
-                    console.error('Error moving item:', error);
-                    alert('Error moving item: ' + error.message);
-                }
-            }
-
-            // Initialize drag and drop when page loads
-            initializeDragAndDrop();
 
             // =========================
             // SHOP LISTS DRAG AND DROP FUNCTIONALITY
@@ -2067,29 +1981,1827 @@
                     assignProductBtn.disabled = false;
                 }
             }
+        });
 
-            // Helper function to show alerts
-            function showAlert(message, type = 'info', timeout = 5000) {
-                // Create alert element
-                const alertDiv = document.createElement('div');
-                alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
-                alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
-                alertDiv.innerHTML = `
-                    ${message}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                `;
+        // =========================
+        // DRAG AND DROP FUNCTIONALITY (GLOBAL SCOPE)
+        // =========================
+        
+        let draggedElement = null;
+        let draggedElementData = null;
+        let touchStartY = 0;
+        let touchStartX = 0;
+        let isDragging = false;
+        let placeholder = null;
 
-                // Add to page
-                document.body.appendChild(alertDiv);
+        // Initialize drag and drop
+        function initializeDragAndDrop() {
+            // Check if we're on mobile (touch device)
+            const isMobile = window.innerWidth <= 991.98;
+            
+            // Add event listeners to all draggable items
+            document.querySelectorAll('.draggable-item').forEach(item => {
+                if (!isMobile) {
+                    // Desktop drag events only
+                    item.addEventListener('dragstart', handleDragStart);
+                    item.addEventListener('dragend', handleDragEnd);
+                    
+                    // Ensure draggable attribute is set on desktop
+                    item.setAttribute('draggable', 'true');
+                } else {
+                    // On mobile, disable drag completely
+                    item.setAttribute('draggable', 'false');
+                    item.removeAttribute('draggable');
+                }
+            });
 
-                // Auto remove after specified timeout
-                setTimeout(() => {
-                    if (alertDiv.parentNode) {
-                        alertDiv.remove();
+            if (!isMobile) {
+                // Add event listeners to all drop zones (including empty lists) - desktop only
+                document.querySelectorAll('.draggable-list').forEach(zone => {
+                    zone.addEventListener('dragover', handleDragOver);
+                    zone.addEventListener('drop', handleDrop);
+                    zone.addEventListener('dragenter', handleDragEnter);
+                    zone.addEventListener('dragleave', handleDragLeave);
+                });
+                
+                // Also add listeners to card bodies for empty shops - desktop only
+                document.querySelectorAll('.card-body').forEach(zone => {
+                    zone.addEventListener('dragover', handleDragOver);
+                    zone.addEventListener('drop', handleDrop);
+                    zone.addEventListener('dragenter', handleDragEnter);
+                    zone.addEventListener('dragleave', handleDragLeave);
+                });
+            }
+        }
+
+        // Desktop Drag Events
+        function handleDragStart(e) {
+            // Prevent this drag event from propagating to parent shop card
+            e.stopPropagation();
+            
+            // Ensure the parent shop card is not draggable when dragging list items
+            const shopCard = e.target.closest('.shop-card-container');
+            if (shopCard) {
+                shopCard.setAttribute('draggable', 'false');
+                shopCard.classList.remove('header-dragging');
+            }
+            
+            draggedElement = e.target;
+            draggedElementData = {
+                itemId: draggedElement.dataset.itemId,
+                itemName: draggedElement.dataset.itemName,
+                itemQuantity: draggedElement.dataset.itemQuantity,
+                currentShopId: draggedElement.dataset.itemShopId,
+                isPurchased: draggedElement.dataset.purchased === 'true'
+            };
+            
+            draggedElement.classList.add('dragging');
+            document.body.classList.add('dragging-active');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', e.target.outerHTML);
+            
+            console.log('Drag started:', draggedElementData);
+        }
+
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+            document.body.classList.remove('dragging-active');
+            clearAllDragStyles();
+            draggedElement = null;
+            draggedElementData = null;
+        }
+
+        function handleDragEnter(e) {
+            e.preventDefault();
+            
+            // Handle drop zones
+            const list = e.target.closest('.draggable-list');
+            const cardBody = e.target.closest('.card-body');
+            
+            if (list) {
+                list.classList.add('drag-over');
+            } else if (cardBody && !cardBody.querySelector('.draggable-list')) {
+                // This is an empty card body, highlight the card
+                const card = cardBody.closest('.card');
+                if (card) {
+                    card.classList.add('drag-target');
+                }
+            }
+        }
+
+        function handleDragLeave(e) {
+            // Only remove highlight if we're actually leaving the element
+            if (!e.currentTarget.contains(e.relatedTarget)) {
+                if (e.target.classList.contains('draggable-list')) {
+                    e.target.classList.remove('drag-over');
+                }
+                
+                const card = e.target.closest('.card');
+                if (card) {
+                    card.classList.remove('drag-target');
+                }
+            }
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            
+            const list = e.target.closest('.draggable-list');
+            const cardBody = e.target.closest('.card-body');
+            
+            if (list) {
+                // Clear any existing placeholders
+                removePlaceholder();
+                
+                // Add placeholder to show where the item will be dropped
+                const afterElement = getDragAfterElement(list, e.clientY);
+                if (afterElement == null) {
+                    list.appendChild(createPlaceholder());
+                } else {
+                    list.insertBefore(createPlaceholder(), afterElement);
+                }
+            } else if (cardBody && !cardBody.querySelector('.draggable-list')) {
+                // This is an empty card, we can drop here
+                const card = cardBody.closest('.card');
+                if (card) {
+                    card.classList.add('drag-target');
+                }
+            }
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            
+            let dropZone = e.target.closest('.draggable-list');
+            let targetShopId = null;
+            let isPurchasedSection = false;
+            let insertPosition = null;
+            
+            if (dropZone) {
+                // Dropped on an existing list
+                targetShopId = dropZone.dataset.shopId;
+                isPurchasedSection = dropZone.dataset.purchasedSection === 'true';
+                
+                // Check if we need to handle reordering within the same list
+                if (parseInt(targetShopId) === parseInt(draggedElementData.currentShopId) && 
+                    isPurchasedSection === draggedElementData.isPurchased) {
+                    
+                    // This is a reorder within the same list
+                    console.log('Reordering within same list');
+                    
+                    // Find where to insert based on the placeholder position
+                    const placeholder = dropZone.querySelector('.drag-placeholder');
+                    if (placeholder) {
+                        // Get all items in the list (excluding the dragged item and placeholder)
+                        const allItems = [...dropZone.querySelectorAll('.draggable-item:not(.dragging)')];
+                        insertPosition = allItems.findIndex(item => item.nextSibling === placeholder);
+                        if (insertPosition === -1) {
+                            insertPosition = allItems.length; // Insert at end
+                        }
+                        console.log('Insert position:', insertPosition);
+                        
+                        // Perform the reorder in the UI immediately
+                        handleReorderInSameList(draggedElement, dropZone, placeholder);
                     }
-                }, timeout);
+                    
+                    clearAllDragStyles();
+                    removePlaceholder();
+                    return; // Don't proceed with API calls for same-list reordering
+                }
+            } else {
+                // Check if dropped on empty card body
+                const cardBody = e.target.closest('.card-body');
+                if (cardBody) {
+                    const card = cardBody.closest('.card');
+                    const shopHeader = card?.querySelector('.card-header h5');
+                    
+                    if (shopHeader) {
+                        // Extract shop ID from existing lists in other cards or find by shop name
+                        const allShopCards = document.querySelectorAll('.card');
+                        for (const shopCard of allShopCards) {
+                            if (shopCard === card) {
+                                // Find shop ID from header or existing list
+                                const existingList = shopCard.querySelector('[data-shop-id]');
+                                if (existingList) {
+                                    targetShopId = existingList.dataset.shopId;
+                                    break;
+                                } else {
+                                    // This is an empty card, we need to get shop ID from other cards with same name
+                                    const headerText = shopHeader.textContent.replace(/^\s*[^\w]*\s*/, '').trim();
+                                    for (const otherCard of allShopCards) {
+                                        const otherList = otherCard.querySelector('[data-shop-id]');
+                                        const otherHeader = otherCard.querySelector('.card-header h5');
+                                        if (otherList && otherHeader) {
+                                            const otherHeaderText = otherHeader.textContent.replace(/^\s*[^\w]*\s*/, '').trim();
+                                            if (otherHeaderText === headerText) {
+                                                targetShopId = otherList.dataset.shopId;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            if (targetShopId && draggedElement && draggedElementData) {
+                console.log('Drop event:', {
+                    targetShopId,
+                    isPurchasedSection,
+                    draggedData: draggedElementData
+                });
+                
+                // Handle the drop (shop or purchase status change)
+                handleItemMove(
+                    draggedElementData.itemId,
+                    targetShopId,
+                    isPurchasedSection
+                );
+            } else {
+                console.log('Drop failed - no valid target found');
+            }
+            
+            clearAllDragStyles();
+            removePlaceholder();
+        }
+
+        // Helper Functions
+        function getDragAfterElement(container, y) {
+            const draggableElements = [...container.querySelectorAll('.draggable-item:not(.dragging)')];
+            
+            return draggableElements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+                
+                if (offset < 0 && offset > closest.offset) {
+                    return { offset: offset, element: child };
+                } else {
+                    return closest;
+                }
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
+        }
+
+        function createPlaceholder() {
+            if (!placeholder) {
+                placeholder = document.createElement('div');
+                placeholder.className = 'drag-placeholder';
+            }
+            return placeholder;
+        }
+
+        function removePlaceholder() {
+            if (placeholder && placeholder.parentNode) {
+                placeholder.parentNode.removeChild(placeholder);
+            }
+            placeholder = null;
+        }
+
+        function clearAllDragStyles() {
+            document.querySelectorAll('.drag-over').forEach(el => {
+                el.classList.remove('drag-over');
+            });
+            document.querySelectorAll('.drag-target').forEach(el => {
+                el.classList.remove('drag-target');
+            });
+            removePlaceholder();
+        }
+
+        // Handle reordering within the same list
+        function handleReorderInSameList(draggedElement, dropZone, placeholder) {
+            console.log('Handling reorder in same list');
+            
+            // Remove the dragged element from its current position
+            const originalParent = draggedElement.parentNode;
+            const originalNextSibling = draggedElement.nextSibling;
+            
+            // Insert the element at the new position (where the placeholder is)
+            if (placeholder && placeholder.parentNode) {
+                placeholder.parentNode.insertBefore(draggedElement, placeholder);
+                console.log('Element moved to new position');
+            } else {
+                // If no placeholder, append to end
+                dropZone.appendChild(draggedElement);
+                console.log('Element moved to end of list');
+            }
+            
+            // Show visual feedback with CSS class
+            draggedElement.classList.add('just-moved');
+            
+            setTimeout(() => {
+                draggedElement.classList.remove('just-moved');
+            }, 600);
+            
+            console.log('Reorder completed in UI');
+        }
+
+        // Handle item move between lists or within list
+        async function handleItemMove(itemId, targetShopId, isPurchasedSection = false) {
+            console.log('Moving item:', itemId, 'to shop:', targetShopId, 'purchased:', isPurchasedSection);
+            
+            try {
+                const response = await fetch('/api/move-item', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        itemId: itemId,
+                        targetShopId: targetShopId,
+                        isPurchased: isPurchasedSection
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    console.log('Item moved successfully');
+                    // Reload the page to reflect changes
+                    window.location.reload();
+                } else {
+                    console.error('Failed to move item:', result.message || 'Unknown error');
+                    alert('Failed to move item: ' + (result.message || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error moving item:', error);
+                alert('Error moving item: ' + error.message);
+            }
+        }
+
+        // =========================
+        // GLOBAL VARIABLES
+        // =========================
+        // Global household data
+        window.currentHousehold = null;
+
+        // =========================
+        // GLOBAL UTILITY FUNCTIONS
+        // =========================
+        // Mobile-friendly confirmation function
+        window.showConfirmation = function(title, message, onConfirm, onCancel = null) {
+            const confirmHtml = `
+                <div class="modal fade" id="mobileConfirmModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">${title}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>${message}</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="cancelBtn">Cancel</button>
+                                <button type="button" class="btn btn-danger" id="confirmBtn">Confirm</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Remove any existing modal
+            const existingModal = document.getElementById('mobileConfirmModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
+            // Add modal to page
+            document.body.insertAdjacentHTML('beforeend', confirmHtml);
+            
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('mobileConfirmModal'));
+            modal.show();
+            
+            // Handle buttons
+            document.getElementById('confirmBtn').addEventListener('click', function() {
+                modal.hide();
+                if (onConfirm) onConfirm();
+                setTimeout(() => {
+                    const modalElement = document.getElementById('mobileConfirmModal');
+                    if (modalElement) modalElement.remove();
+                }, 500);
+            });
+            
+            document.getElementById('cancelBtn').addEventListener('click', function() {
+                modal.hide();
+                if (onCancel) onCancel();
+                setTimeout(() => {
+                    const modalElement = document.getElementById('mobileConfirmModal');
+                    if (modalElement) modalElement.remove();
+                }, 500);
+            });
+        };
+        
+        // Mobile-friendly text input confirmation function
+        window.showInputConfirmation = function(title, message, requiredText, onConfirm, onCancel = null) {
+            const inputConfirmHtml = `
+                <div class="modal fade" id="mobileInputConfirmModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">${title}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>${message}</p>
+                                <p class="fw-bold text-warning">Type "<span class="text-danger">${requiredText}</span>" to confirm:</p>
+                                <input type="text" class="form-control" id="confirmationInput" placeholder="Type here..." autocomplete="off">
+                                <div class="text-danger mt-2 d-none" id="inputError">Text does not match. Please try again.</div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="inputCancelBtn">Cancel</button>
+                                <button type="button" class="btn btn-danger" id="inputConfirmBtn">Confirm</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Remove any existing modal
+            const existingModal = document.getElementById('mobileInputConfirmModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
+            // Add modal to page
+            document.body.insertAdjacentHTML('beforeend', inputConfirmHtml);
+            
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('mobileInputConfirmModal'));
+            modal.show();
+            
+            // Focus on input
+            setTimeout(() => {
+                document.getElementById('confirmationInput').focus();
+            }, 300);
+            
+            // Handle confirm button
+            document.getElementById('inputConfirmBtn').addEventListener('click', function() {
+                const input = document.getElementById('confirmationInput');
+                const errorDiv = document.getElementById('inputError');
+                
+                if (input.value === requiredText) {
+                    modal.hide();
+                    if (onConfirm) onConfirm();
+                    setTimeout(() => {
+                        const modalElement = document.getElementById('mobileInputConfirmModal');
+                        if (modalElement) modalElement.remove();
+                    }, 500);
+                } else {
+                    errorDiv.classList.remove('d-none');
+                    input.classList.add('is-invalid');
+                    input.focus();
+                    input.select();
+                }
+            });
+            
+            // Handle cancel button
+            document.getElementById('inputCancelBtn').addEventListener('click', function() {
+                modal.hide();
+                if (onCancel) onCancel();
+                setTimeout(() => {
+                    const modalElement = document.getElementById('mobileInputConfirmModal');
+                    if (modalElement) modalElement.remove();
+                }, 500);
+            });
+            
+            // Handle Enter key
+            document.getElementById('confirmationInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    document.getElementById('inputConfirmBtn').click();
+                }
+            });
+            
+            // Clear error when typing
+            document.getElementById('confirmationInput').addEventListener('input', function() {
+                this.classList.remove('is-invalid');
+                document.getElementById('inputError').classList.add('d-none');
+            });
+        };
+        
+        // Global alert function with enhanced mobile support
+        window.showAlert = function(message, type = 'info', timeout = 5000) {
+            // Create alert element
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            
+            // Enhanced mobile-friendly positioning and styling
+            const isMobile = window.innerWidth <= 768;
+            if (isMobile) {
+                // Mobile: position at top center for better visibility
+                alertDiv.style.cssText = `
+                    top: 20px; 
+                    left: 50%; 
+                    transform: translateX(-50%); 
+                    z-index: 99999; 
+                    min-width: 280px; 
+                    max-width: calc(100vw - 40px);
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                    border: 2px solid rgba(255,255,255,0.2);
+                `;
+            } else {
+                // Desktop: original position
+                alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 99999; min-width: 300px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);';
+            }
+            
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+
+            // Add to page
+            document.body.appendChild(alertDiv);
+            
+            // Add a simple animation and console log for debugging
+            console.log(`Alert shown: ${message} (type: ${type})`);
+            
+            // Force a small delay to ensure the alert is visible
+            setTimeout(() => {
+                alertDiv.style.opacity = '1';
+            }, 50);
+
+            // Auto remove after specified timeout
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, timeout);
+        };
+
+        // =========================
+        // GLOBAL HOUSEHOLD FUNCTIONS (accessible from inline handlers)
+        // =========================
+        
+        window.showCreateForm = function() {
+            document.getElementById('householdOptionsSection').classList.add('d-none');
+            document.getElementById('createHouseholdForm').classList.remove('d-none');
+            document.getElementById('newHouseholdName').focus();
+        };
+
+        window.hideCreateForm = function() {
+            document.getElementById('householdOptionsSection').classList.remove('d-none');
+            document.getElementById('createHouseholdForm').classList.add('d-none');
+            document.getElementById('newHouseholdName').value = '';
+        };
+
+        window.showJoinForm = function() {
+            document.getElementById('householdOptionsSection').classList.add('d-none');
+            document.getElementById('joinHouseholdForm').classList.remove('d-none');
+            document.getElementById('householdIdInput').focus();
+        };
+
+        window.hideJoinForm = function() {
+            document.getElementById('householdOptionsSection').classList.remove('d-none');
+            document.getElementById('joinHouseholdForm').classList.add('d-none');
+            document.getElementById('householdIdInput').value = '';
+        };
+
+        window.copyHouseholdId = function() {
+            if (currentHousehold) {
+                copyToClipboard(currentHousehold.id.toString());
+                showAlert('Household ID copied to clipboard!', 'success', 2000);
+            }
+        };
+
+        window.createHousehold = async function() {
+            const name = document.getElementById('newHouseholdName').value.trim();
+            
+            if (!name) {
+                window.showAlert('Please enter a household name', 'warning');
+                return;
+            }
+
+            window.setCreateLoadingState(true);
+            
+            try {
+                const response = await fetch('/api/household/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name: name })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    window.showAlert(`Household "${name}" created successfully! Share ID: ${result.household.id}`, 'success');
+                    window.currentHousehold = result.household;
+                    window.hideCreateForm();
+                    window.showCurrentHousehold(result.household);
+                    
+                    // Copy ID to clipboard
+                    window.copyToClipboard(result.household.id.toString());
+                } else {
+                    window.showAlert(result.error || 'Failed to create household', 'danger');
+                }
+            } catch (error) {
+                console.error('Error creating household:', error);
+                window.showAlert('Network error. Please try again.', 'danger');
+            } finally {
+                window.setCreateLoadingState(false);
+            }
+        };
+
+        window.requestJoinHousehold = async function() {
+            const householdId = document.getElementById('householdIdInput').value.trim();
+            
+            if (!householdId || householdId.length !== 6) {
+                window.showAlert('Please enter a valid 6-digit household ID', 'warning');
+                return;
+            }
+
+            window.setJoinLoadingState(true);
+            
+            try {
+                const response = await fetch('/api/household/join-request', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ householdId: parseInt(householdId) })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    window.showAlert(`Join request sent to "${result.household.name}"! Wait for approval.`, 'success');
+                    window.hideJoinForm();
+                    
+                    // Close modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('householdModal'));
+                    modal.hide();
+                } else {
+                    window.showAlert(result.error || 'Failed to send join request', 'danger');
+                }
+            } catch (error) {
+                console.error('Error sending join request:', error);
+                window.showAlert('Network error. Please try again.', 'danger');
+            } finally {
+                window.setJoinLoadingState(false);
+            }
+        };
+
+        window.approveRequest = async function(requestId) {
+            try {
+                const response = await fetch('/api/household/approve-request', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ requestId: requestId })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    window.showAlert('Join request approved!', 'success');
+                    await window.reloadHouseholdData(); // Reload all household data
+                } else {
+                    window.showAlert(result.message || 'Failed to approve request', 'danger');
+                }
+            } catch (error) {
+                console.error('Error approving request:', error);
+                window.showAlert('Network error. Please try again.', 'danger');
+            }
+        };
+
+        window.rejectRequest = async function(requestId) {
+            window.showConfirmation(
+                'Reject Join Request',
+                'Are you sure you want to reject this join request?',
+                async function() {
+                    try {
+                        const response = await fetch('/api/household/reject-request', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ requestId: requestId })
+                        });
+
+                        const result = await response.json();
+                        
+                        if (result.success) {
+                            window.showAlert('Join request rejected', 'info');
+                            await window.reloadHouseholdData(); // Reload all household data
+                        } else {
+                            window.showAlert(result.message || 'Failed to reject request', 'danger');
+                        }
+                    } catch (error) {
+                        console.error('Error rejecting request:', error);
+                        window.showAlert('Network error. Please try again.', 'danger');
+                    }
+                }
+            );
+        };
+
+        // Global loading state functions
+        window.setCreateLoadingState = function(loading) {
+            const button = document.getElementById('createButtonText');
+            const spinner = document.getElementById('createButtonSpinner');
+            
+            if (loading) {
+                button.classList.add('d-none');
+                spinner.classList.remove('d-none');
+            } else {
+                button.classList.remove('d-none');
+                spinner.classList.add('d-none');
+            }
+        };
+
+        window.setJoinLoadingState = function(loading) {
+            const button = document.getElementById('joinButtonText');
+            const spinner = document.getElementById('joinButtonSpinner');
+            
+            if (loading) {
+                button.classList.add('d-none');
+                spinner.classList.remove('d-none');
+            } else {
+                button.classList.remove('d-none');
+                spinner.classList.add('d-none');
+            }
+        };
+
+        // Global utility functions
+        window.copyToClipboard = function(text) {
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text);
+            } else {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+            }
+        };
+
+        window.showCurrentHousehold = function(household) {
+            document.getElementById('currentHouseholdSection').classList.remove('d-none');
+            document.getElementById('householdOptionsSection').classList.add('d-none');
+            
+            document.getElementById('currentHouseholdName').textContent = household.name;
+            document.getElementById('currentHouseholdId').textContent = household.id;
+            document.getElementById('currentHouseholdRole').textContent = household.role;
+            
+            // Show/hide member management section and leave button based on role
+            const memberManagementSection = document.getElementById('memberManagementSection');
+            const deleteHouseholdSection = document.getElementById('deleteHouseholdSection');
+            const leaveHouseholdButton = document.getElementById('leaveHouseholdButtonContainer');
+            
+            if (household.role === 'owner') {
+                memberManagementSection.classList.remove('d-none');
+                deleteHouseholdSection.classList.remove('d-none');
+                leaveHouseholdButton.classList.add('d-none');
+                // Load members for owners
+                window.loadHouseholdMembers();
+            } else {
+                memberManagementSection.classList.add('d-none');
+                deleteHouseholdSection.classList.add('d-none');
+                leaveHouseholdButton.classList.remove('d-none');
+            }
+        };
+
+        window.loadPendingRequests = async function() {
+            if (!window.currentHousehold || window.currentHousehold.role !== 'owner') return;
+            
+            try {
+                const timestamp = Date.now();
+                const response = await fetch(`/api/household/pending-requests?_t=${timestamp}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Always call showPendingRequests, even if the array is empty
+                    window.showPendingRequests(result.pendingRequests || []);
+                } else {
+                    // If there's an error, hide the section
+                    window.showPendingRequests([]);
+                }
+            } catch (error) {
+                console.error('Error loading pending requests:', error);
+                // On error, hide the section
+                window.showPendingRequests([]);
+            }
+        };
+
+        window.showPendingRequests = function(requests) {
+            const container = document.getElementById('pendingRequestsList');
+            const section = document.getElementById('pendingRequestsSection');
+            
+            if (requests.length === 0) {
+                section.classList.add('d-none');
+                return;
+            }
+            
+            section.classList.remove('d-none');
+            container.innerHTML = '';
+            
+            requests.forEach(request => {
+                const requestElement = document.createElement('div');
+                requestElement.className = 'card mb-2';
+                requestElement.innerHTML = `
+                    <div class="card-body py-2">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>${request.username}</strong>
+                                <br>
+                                <small class="text-muted">Requested: ${request.requestedAt}</small>
+                            </div>
+                            <div class="btn-group" role="group">
+                                <button class="btn btn-sm btn-success" onclick="approveRequest(${request.id})">
+                                    <i class="fas fa-check"></i> Approve
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="rejectRequest(${request.id})">
+                                    <i class="fas fa-times"></i> Reject
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(requestElement);
+            });
+        };
+
+        // =========================
+        // MEMBER MANAGEMENT FUNCTIONS
+        // =========================
+
+        // Reload household data and keep modal open
+        window.reloadHouseholdData = async function() {
+            // Small delay to ensure database transaction is committed
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            await window.loadCurrentHousehold();
+            await window.loadPendingRequests();
+            if (window.currentHousehold && window.currentHousehold.role === 'owner') {
+                await window.loadHouseholdMembers();
+            }
+        };
+
+        // Load household members (for owners)
+        window.loadHouseholdMembers = async function() {
+            if (!window.currentHousehold || window.currentHousehold.role !== 'owner') return;
+            
+            try {
+                const timestamp = Date.now();
+                const response = await fetch(`/api/household/members?_t=${timestamp}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    window.showHouseholdMembers(result.members);
+                } else {
+                    throw new Error(result.message || 'Failed to load members');
+                }
+            } catch (error) {
+                console.error('Error loading household members:', error);
+                document.getElementById('membersList').innerHTML = 
+                    '<div class="alert alert-danger">Error loading members. Please try again.</div>';
+            }
+        };
+
+        // Display household members
+        window.showHouseholdMembers = function(members) {
+            const container = document.getElementById('membersList');
+            
+            if (!members || members.length === 0) {
+                container.innerHTML = '<div class="text-muted">No members found.</div>';
+                return;
+            }
+            
+            container.innerHTML = '';
+            
+            members.forEach(member => {
+                const memberElement = document.createElement('div');
+                memberElement.className = 'border rounded p-3 mb-2';
+                
+                const removeButtonHtml = member.role !== 'owner' 
+                    ? `<button class="btn btn-sm btn-outline-danger" 
+                              onclick="removeMember('${member.userId}', '${member.username.replace(/'/g, "\\'")}' )"
+                              title="Remove member">
+                           <i class="fas fa-user-minus me-1"></i>Remove
+                       </button>`
+                    : '<span class="badge bg-primary p-2">Owner</span>';
+                
+                memberElement.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="fw-bold">${member.username}</div>
+                            <small class="text-muted">
+                                Role: ${member.role} | 
+                                Joined: ${new Date(member.joinedAt).toLocaleDateString()}
+                            </small>
+                        </div>
+                        <div>
+                            ${removeButtonHtml}
+                        </div>
+                    </div>
+                `;
+                container.appendChild(memberElement);
+            });
+        };
+
+        // Remove a member from household (for owners)
+        window.removeMember = async function(userId, username) {
+            window.showConfirmation(
+                'Remove Member',
+                `Are you sure you want to remove <strong>${username}</strong> from the household?`,
+                async function() {
+            
+            try {
+                const response = await fetch('/api/household/remove-member', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ userId: userId })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    window.showAlert(`${username} has been removed from the household`, 'success');
+                    await window.reloadHouseholdData(); // Reload all household data
+                } else {
+                    window.showAlert(result.message || 'Failed to remove member', 'danger');
+                }
+            } catch (error) {
+                console.error('Error removing member:', error);
+                window.showAlert('Error removing member: ' + error.message, 'danger');
+            }
+        }
+            );
+        };
+
+        // Leave household (for members)
+        window.leaveHousehold = async function() {
+            window.showConfirmation(
+                'Leave Household',
+                'Are you sure you want to leave this household?',
+                async function() {
+            
+            try {
+                const response = await fetch('/api/household/leave', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    window.showAlert('You have left the household', 'info');
+                    // Close the modal and reload the entire page since user is no longer in household
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('householdModal'));
+                    modal.hide();
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    window.showAlert(result.message || 'Failed to leave household', 'danger');
+                }
+            } catch (error) {
+                console.error('Error leaving household:', error);
+                window.showAlert('Error leaving household: ' + error.message, 'danger');
+            }
+        }
+            );
+        };
+
+        // =========================
+        // DELETE HOUSEHOLD FUNCTIONALITY (OWNER ONLY)
+        // =========================
+
+        // Confirm household deletion with detailed warning
+        window.confirmDeleteHousehold = function() {
+            if (!window.currentHousehold || window.currentHousehold.role !== 'owner') {
+                window.showAlert('Only household owners can delete households', 'danger');
+                return;
+            }
+
+            const householdName = window.currentHousehold.name;
+            const confirmMessage = `⚠️ PERMANENT DELETION WARNING ⚠️
+
+Are you absolutely sure you want to delete "${householdName}"?
+
+This action will PERMANENTLY:
+• Delete ALL shopping lists and items
+• Remove ALL household members  
+• Delete the household completely
+• This action CANNOT be undone`;
+
+            window.showInputConfirmation(
+                'Delete Household',
+                confirmMessage,
+                'DELETE',
+                function() {
+                    window.deleteHousehold();
+                },
+                function() {
+                    window.showAlert('Household deletion cancelled.', 'info');
+                }
+            );
+        };
+
+        // Delete household - perform the actual deletion
+        window.deleteHousehold = async function() {
+            if (!window.currentHousehold || window.currentHousehold.role !== 'owner') {
+                window.showAlert('Only household owners can delete households', 'danger');
+                return;
+            }
+
+            try {
+                // Show loading state
+                const deleteButton = document.querySelector('button[onclick="confirmDeleteHousehold()"]');
+                const originalText = deleteButton.innerHTML;
+                deleteButton.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Deleting...';
+                deleteButton.disabled = true;
+
+                const response = await fetch('/api/household/delete', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    window.showAlert(`Household deleted successfully! Removed ${result.details.deletedItems} items and ${result.details.deletedMemberships} memberships.`, 'success');
+                    
+                    // Close the modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('householdModal'));
+                    modal.hide();
+                    
+                    // Reload the page after a short delay to reflect changes
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+                } else {
+                    // Restore button state on error
+                    deleteButton.innerHTML = originalText;
+                    deleteButton.disabled = false;
+                    window.showAlert(result.error || 'Failed to delete household', 'danger');
+                }
+            } catch (error) {
+                console.error('Error deleting household:', error);
+                
+                // Restore button state on error
+                const deleteButton = document.querySelector('button[onclick="confirmDeleteHousehold()"]');
+                deleteButton.innerHTML = '<i class="fas fa-trash me-1"></i>Delete Household';
+                deleteButton.disabled = false;
+                
+                window.showAlert('Network error. Please try again.', 'danger');
+            }
+        };
+
+        // =========================
+        // SHOP SETUP FUNCTIONALITY
+        // =========================
+        
+        let shopsList = [];
+        let hasDeletedShops = false; // Track if any shops were deleted
+
+        // Initialize shop setup modal with existing shops
+        function initializeShopSetup() {
+            // Clear the shops list and reset deletion flag
+            shopsList = [];
+            hasDeletedShops = false;
+            
+            // Load existing shops if any
+            const existingShops = {{ userShops|json_encode|raw }};
+            
+            if (existingShops && existingShops.length > 0) {
+                existingShops.forEach(shop => {
+                    // Add existing shops to the list
+                    if (shop && shop.name) {
+                        shopsList.push({
+                            name: shop.name,
+                            shopId: shop.shopId,
+                            isExisting: true
+                        });
+                    }
+                });
+            }
+            
+            updateShopsDisplay();
+        }
+
+        // Listen for modal open event
+        document.addEventListener('DOMContentLoaded', function() {
+            const shopModal = document.getElementById('shopSetupModal');
+            if (shopModal) {
+                shopModal.addEventListener('show.bs.modal', function() {
+                    initializeShopSetup();
+                    updateRegionalShopsButton();
+                });
             }
         });
+
+        // Update the regional shops button text based on user location
+        window.updateRegionalShopsButton = async function() {
+            try {
+                const response = await fetch('/api/location-shops', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                const result = await response.json();
+                const button = document.getElementById('addSampleShopsBtn');
+                const locationSpan = document.getElementById('currentLocation');
+                
+                if (result.success && result.location && result.location.country) {
+                    button.innerHTML = `<i class="fas fa-magic me-1"></i>Add ${result.location.country} Shops`;
+                    
+                    // Update location display
+                    let locationText = result.location.country;
+                    if (result.location.region) {
+                        locationText += `, ${result.location.region}`;
+                    }
+                    if (result.location.detectedFrom) {
+                        locationText += ` (${result.location.detectedFrom === 'ip' ? 'auto-detected' : result.location.detectedFrom})`;
+                    }
+                    locationSpan.textContent = locationText;
+                } else {
+                    button.innerHTML = '<i class="fas fa-magic me-1"></i>Add Regional Shops';
+                    locationSpan.textContent = 'Location not detected';
+                }
+            } catch (error) {
+                console.error('Error updating button text:', error);
+                document.getElementById('currentLocation').textContent = 'Location detection failed';
+            }
+        };
+
+        // Toggle location settings form
+        window.toggleLocationSettings = function() {
+            const form = document.getElementById('locationSettingsForm');
+            const isVisible = !form.classList.contains('d-none');
+            
+            if (isVisible) {
+                form.classList.add('d-none');
+            } else {
+                form.classList.remove('d-none');
+                // Load current location data into form if available
+                loadCurrentLocationToForm();
+            }
+        };
+
+        // Load current location data into the form
+        window.loadCurrentLocationToForm = async function() {
+            try {
+                const response = await fetch('/api/location-shops', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                const result = await response.json();
+                
+                if (result.success && result.location) {
+                    document.getElementById('countryCodeInput').value = result.location.countryCode || '';
+                    document.getElementById('countryInput').value = result.location.country || '';
+                    document.getElementById('regionInput').value = result.location.region || '';
+                }
+            } catch (error) {
+                console.error('Error loading location data:', error);
+            }
+        };
+
+        // Save location settings
+        window.saveLocationSettings = async function() {
+            try {
+                const countryCode = document.getElementById('countryCodeInput').value.trim();
+                const country = document.getElementById('countryInput').value.trim();
+                const region = document.getElementById('regionInput').value.trim();
+
+                if (!countryCode || !country) {
+                    window.showAlert('Please enter both country code and country name', 'warning');
+                    return;
+                }
+
+                const response = await fetch('/api/update-location', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({
+                        countryCode: countryCode.toUpperCase(),
+                        country: country,
+                        region: region
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    window.showAlert('Location updated successfully', 'success');
+                    toggleLocationSettings();
+                    updateRegionalShopsButton(); // Refresh the button and location display
+                } else {
+                    window.showAlert(result.error || 'Failed to update location', 'danger');
+                }
+            } catch (error) {
+                console.error('Error saving location:', error);
+                window.showAlert('Network error. Please try again.', 'danger');
+            }
+        };
+
+        // Add shop to the temporary list
+        window.addShopToList = function() {
+            const shopNameInput = document.getElementById('newShopName');
+            const shopName = shopNameInput.value.trim();
+            
+            if (!shopName) {
+                window.showAlert('Please enter a shop name', 'warning');
+                return;
+            }
+            
+            // Check if shop already exists in the list
+            // Add null/undefined checks to prevent TypeError
+            if (shopsList.some(shop => shop && shop.name && shop.name.toLowerCase() === shopName.toLowerCase())) {
+                window.showAlert('This shop is already in your list', 'warning');
+                return;
+            }
+            
+            // Add shop to temporary list
+            shopsList.push({
+                name: shopName,
+                tempId: Date.now() // Temporary ID for UI purposes
+            });
+            
+            // Clear input
+            shopNameInput.value = '';
+            
+            // Update UI
+            updateShopsDisplay();
+            
+            window.showAlert(`Added "${shopName}" to your shops list`, 'success');
+        };
+
+        // Update the shops display in the modal
+        function updateShopsDisplay() {
+            const noShopsMessage = document.getElementById('noShopsMessage');
+            const shopsContainer = document.getElementById('shopsContainer');
+            
+            if (shopsList.length === 0) {
+                noShopsMessage.classList.remove('d-none');
+                shopsContainer.classList.add('d-none');
+            } else {
+                noShopsMessage.classList.add('d-none');
+                shopsContainer.classList.remove('d-none');
+                
+                // Generate shops HTML
+                shopsContainer.innerHTML = shopsList.map((shop, index) => `
+                    <div class="d-flex justify-content-between align-items-center p-2 mb-2 rounded border">
+                        <div class="d-flex align-items-center flex-grow-1">
+                            <i class="fas fa-store text-primary me-2"></i>
+                            <span>${shop.name}</span>
+                            ${shop.isExisting ? '<span class="badge bg-secondary ms-2">Existing</span>' : '<span class="badge bg-success ms-2">New</span>'}
+                        </div>
+                        <div class="shop-remove-btn-container">
+                            <button class="btn btn-sm btn-outline-danger shop-remove-btn" 
+                                    data-shop-id="${shop.shopId || ''}" 
+                                    data-shop-name="${shop.name}" 
+                                    data-shop-index="${index}" 
+                                    data-is-existing="${shop.isExisting ? 'true' : 'false'}"
+                                    title="Remove shop"
+                                    type="button">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+                
+                // Add event listeners for remove buttons (enhanced mobile support)
+                const removeButtons = shopsContainer.querySelectorAll('.shop-remove-btn');
+                removeButtons.forEach(button => {
+                    // Remove any existing listeners
+                    button.replaceWith(button.cloneNode(true));
+                });
+                
+                // Re-query after replacing
+                const newRemoveButtons = shopsContainer.querySelectorAll('.shop-remove-btn');
+                newRemoveButtons.forEach(button => {
+                    console.log('Adding event listeners to shop remove button');
+                    
+                    // Simple, reliable approach for mobile
+                    let isProcessing = false;
+                    
+                    // Function to handle removal
+                    const handleRemoval = function() {
+                        if (isProcessing) return;
+                        isProcessing = true;
+                        
+                        console.log('Shop remove button activated');
+                        
+                        const shopId = this.dataset.shopId;
+                        const shopName = this.dataset.shopName;
+                        const shopIndex = parseInt(this.dataset.shopIndex);
+                        const isExisting = this.dataset.isExisting === 'true';
+                        
+                        console.log('Shop data:', { shopId, shopName, shopIndex, isExisting });
+                        
+                        // Add visual feedback
+                        this.style.backgroundColor = '#dc3545';
+                        this.style.color = 'white';
+                        this.style.border = '1px solid #dc3545';
+                        
+                        // Execute removal
+                        if (isExisting) {
+                            window.removeExistingShop(parseInt(shopId), shopName, shopIndex);
+                        } else {
+                            window.removeShopFromList(shopIndex);
+                        }
+                        
+                        // Reset processing flag after a delay
+                        setTimeout(() => {
+                            isProcessing = false;
+                        }, 500);
+                    };
+                    
+                    // Use both click and touchstart for maximum compatibility
+                    button.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        console.log('Button clicked');
+                        handleRemoval.call(this);
+                    });
+                    
+                    // Add touchstart as backup for mobile
+                    button.addEventListener('touchstart', function(e) {
+                        e.stopPropagation();
+                        console.log('Button touched');
+                        
+                        // Visual feedback on touch
+                        this.style.backgroundColor = '#dc3545';
+                        this.style.color = 'white';
+                        this.style.transform = 'scale(0.95)';
+                        
+                        // Trigger action immediately on touch
+                        setTimeout(() => {
+                            handleRemoval.call(this);
+                            this.style.transform = 'scale(1)';
+                        }, 100);
+                    });
+                });
+            }
+            
+            updateSaveButtonState();
+        }
+
+        // Update the save button state based on changes
+        function updateSaveButtonState() {
+            const saveBtn = document.getElementById('saveShopsBtn');
+            const saveText = document.getElementById('saveShopsText');
+            const newShops = shopsList.filter(shop => !shop.isExisting);
+            const hasChanges = newShops.length > 0 || hasDeletedShops;
+            
+            if (hasChanges) {
+                saveBtn.disabled = false;
+                if (newShops.length > 0 && hasDeletedShops) {
+                    saveText.textContent = 'Save Changes';
+                } else if (newShops.length > 0) {
+                    saveText.textContent = 'Save New Shops';
+                } else if (hasDeletedShops) {
+                    saveText.textContent = 'Apply Changes';
+                }
+            } else {
+                saveBtn.disabled = true;
+                saveText.textContent = 'Save Shops';
+            }
+        }
+
+        // Remove shop from temporary list
+        window.removeShopFromList = function(index) {
+            console.log('removeShopFromList called with index:', index);
+            const removedShop = shopsList.splice(index, 1)[0];
+            updateShopsDisplay();
+            console.log('Calling showAlert for removed shop:', removedShop.name);
+            window.showAlert(`Removed "${removedShop.name}" from your shops list`, 'info');
+        };
+
+        // Remove existing shop from database and UI
+        window.removeExistingShop = async function(shopId, shopName, index) {
+            console.log('removeExistingShop called:', { shopId, shopName, index });
+            
+            // Use mobile-friendly confirmation
+            window.showConfirmation(
+                'Delete Shop',
+                `Are you sure you want to delete "<strong>${shopName}</strong>"?<br><br><small class="text-warning">This will remove all shopping list items from this shop as well.</small>`,
+                async function() {
+                    console.log('User confirmed shop deletion, proceeding...');
+
+                    try {
+                        const response = await fetch('/api/remove-shop', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                shopId: shopId
+                            })
+                        });
+
+                        const result = await response.json();
+                        console.log('Shop deletion API response:', result);
+
+                        if (response.ok && result.success) {
+                            // Remove from the UI list
+                            shopsList.splice(index, 1);
+                            hasDeletedShops = true; // Mark that shops were deleted
+                            updateShopsDisplay();
+                            console.log('Calling showAlert for successful deletion');
+                            window.showAlert(`"${shopName}" has been deleted successfully`, 'success');
+                        } else {
+                            console.log('Shop deletion failed:', result.error);
+                            window.showAlert(result.error || 'Failed to delete shop', 'danger');
+                        }
+                    } catch (error) {
+                        console.error('Error deleting shop:', error);
+                        window.showAlert('Network error. Please try again.', 'danger');
+                    }
+                },
+                function() {
+                    console.log('User cancelled shop deletion');
+                }
+            );
+        };
+
+        // Add location-based sample shops for quick setup
+        window.addSampleShops = async function() {
+            try {
+                // Show loading state
+                const button = document.querySelector('button[onclick="addSampleShops()"]');
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Loading suggestions...';
+                button.disabled = true;
+
+                const response = await fetch('/api/location-shops', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                const result = await response.json();
+
+                // Restore button state
+                button.innerHTML = originalText;
+                button.disabled = false;
+
+                if (result.success && result.suggestedShops && result.suggestedShops.length > 0) {
+                    let addedShops = 0;
+                    
+                    // Add first 8-10 suggested shops to avoid overwhelming the user
+                    const shopsToAdd = result.suggestedShops.slice(0, 10);
+                    
+                    shopsToAdd.forEach(shopName => {
+                        if (!shopsList.some(shop => shop && shop.name && shop.name.toLowerCase() === shopName.toLowerCase())) {
+                            shopsList.push({
+                                name: shopName,
+                                tempId: Date.now() + Math.random()
+                            });
+                            addedShops++;
+                        }
+                    });
+                    
+                    updateShopsDisplay();
+                    
+                    if (addedShops > 0) {
+                        const locationInfo = result.location && result.location.country 
+                            ? ` for ${result.location.country}` 
+                            : '';
+                        window.showAlert(`Added ${addedShops} popular shops${locationInfo} to your list`, 'success');
+                    } else {
+                        window.showAlert('All suggested shops are already in your list', 'info');
+                    }
+                } else {
+                    // Fallback to generic shops if location detection failed
+                    const fallbackShops = ['Local Supermarket', 'Grocery Store', 'Corner Shop', 'Market', 'Food Store'];
+                    let addedShops = 0;
+                    
+                    fallbackShops.forEach(shopName => {
+                        if (!shopsList.some(shop => shop && shop.name && shop.name.toLowerCase() === shopName.toLowerCase())) {
+                            shopsList.push({
+                                name: shopName,
+                                tempId: Date.now() + Math.random()
+                            });
+                            addedShops++;
+                        }
+                    });
+                    
+                    updateShopsDisplay();
+                    window.showAlert(`Added ${addedShops} generic shops to your list`, 'success');
+                }
+            } catch (error) {
+                console.error('Error loading shop suggestions:', error);
+                
+                // Restore button state
+                const button = document.querySelector('button[onclick="addSampleShops()"]');
+                button.innerHTML = '<i class="fas fa-magic me-1"></i>Add Sample Shops';
+                button.disabled = false;
+                
+                // Fallback to basic shops on error
+                const basicShops = ['Supermarket', 'Grocery Store', 'Market'];
+                basicShops.forEach(shopName => {
+                    if (!shopsList.some(shop => shop && shop.name && shop.name.toLowerCase() === shopName.toLowerCase())) {
+                        shopsList.push({
+                            name: shopName,
+                            tempId: Date.now() + Math.random()
+                        });
+                    }
+                });
+                
+                updateShopsDisplay();
+                window.showAlert('Added basic shops to your list', 'warning');
+            }
+        };
+
+        // Save shops to database
+        window.saveShops = async function() {
+            const newShops = shopsList.filter(shop => !shop.isExisting);
+            
+            // Check if there are new shops to save or if shops were deleted
+            if (newShops.length === 0 && !hasDeletedShops) {
+                window.showAlert('No changes to save', 'info');
+                return;
+            }
+            
+            // If only deletions occurred (no new shops), just close modal and refresh
+            if (newShops.length === 0 && hasDeletedShops) {
+                window.showAlert('Changes saved successfully!', 'success');
+                
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('shopSetupModal'));
+                modal.hide();
+                
+                // Reload page to show changes
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+                return;
+            }
+            
+            // Show loading state
+            const saveBtn = document.getElementById('saveShopsBtn');
+            const saveText = document.getElementById('saveShopsText');
+            const saveSpinner = document.getElementById('saveShopsSpinner');
+            
+            saveBtn.disabled = true;
+            saveText.classList.add('d-none');
+            saveSpinner.classList.remove('d-none');
+            
+            try {
+                const response = await fetch('/application/setup-shops', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        shops: newShops.map(shop => shop.name)
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    const totalChanges = newShops.length + (hasDeletedShops ? 1 : 0);
+                    let message = 'Changes saved successfully!';
+                    
+                    if (newShops.length > 0 && hasDeletedShops) {
+                        message = `Added ${newShops.length} new shops and removed deleted shops!`;
+                    } else if (newShops.length > 0) {
+                        message = `Successfully added ${newShops.length} new shops!`;
+                    }
+                    
+                    window.showAlert(message, 'success');
+                    
+                    // Clear the shops list and reset flags
+                    shopsList = [];
+                    hasDeletedShops = false;
+                    
+                    // Close modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('shopSetupModal'));
+                    modal.hide();
+                    
+                    // Reload page to show new shops
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    window.showAlert(result.error || 'Failed to save shops', 'danger');
+                }
+            } catch (error) {
+                console.error('Error saving shops:', error);
+                window.showAlert('Network error. Please try again.', 'danger');
+            } finally {
+                // Reset loading state
+                saveBtn.disabled = false;
+                saveText.classList.remove('d-none');
+                saveSpinner.classList.add('d-none');
+            }
+        };
+
+        // Handle Enter key in shop name input
+        document.addEventListener('DOMContentLoaded', function() {
+            const shopNameInput = document.getElementById('newShopName');
+            if (shopNameInput) {
+                shopNameInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        window.addShopToList();
+                    }
+                });
+            }
+        });
+
+        // =========================
+        // PROFILE MANAGEMENT
+        // =========================
+        
+        // Function to confirm profile deletion
+        window.confirmDeleteProfile = function() {
+            const confirmationText = 'DELETE MY ACCOUNT';
+            const warningMessage = `⚠️ FINAL WARNING ⚠️
+
+This will permanently delete your entire account and all associated data.`;
+
+            window.showInputConfirmation(
+                'Delete Account',
+                warningMessage,
+                confirmationText,
+                function() {
+                    window.deleteUserProfile();
+                },
+                function() {
+                    showAlert('Account deletion cancelled.', 'info');
+                }
+            );
+        };
+        
+        // Function to delete user profile
+        window.deleteUserProfile = async function() {
+            try {
+                showAlert('Deleting account... This may take a moment.', 'warning', 0);
+                
+                const response = await fetch('/api/profile/delete', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    // Show success message
+                    showAlert(result.message, 'success', 3000);
+                    
+                    // Log deletion details if available
+                    if (result.details) {
+                        console.log('Profile deletion completed:', result.details);
+                    }
+                    
+                    // Close any open modals
+                    const profileModal = bootstrap.Modal.getInstance(document.getElementById('profileModal'));
+                    if (profileModal) {
+                        profileModal.hide();
+                    }
+                    
+                    // Force redirect to farewell page immediately
+                    setTimeout(() => {
+                        window.location.replace(result.redirect || '/farewell');
+                    }, 1500);
+                    
+                } else {
+                    showAlert(result.error || 'Failed to delete account', 'danger');
+                }
+            } catch (error) {
+                console.error('Error deleting profile:', error);
+                
+                // Even if there's a network error, still try to redirect after showing error
+                showAlert('Account deletion may have completed. Redirecting...', 'warning');
+                setTimeout(() => {
+                    window.location.replace('/farewell');
+                }, 2000);
+            }
+        };
     </script>
+    
+    <!-- Mobile-friendly CSS for shop deletion buttons -->
+    <style>
+        .shop-remove-btn {
+            /* Ensure buttons are easily tappable on mobile */
+            min-width: 50px !important;
+            min-height: 50px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            position: relative !important;
+            z-index: 1000 !important;
+            border: 2px solid #dc3545 !important;
+            
+            /* Prevent text selection on mobile */
+            -webkit-user-select: none !important;
+            -moz-user-select: none !important;
+            -ms-user-select: none !important;
+            user-select: none !important;
+            
+            /* Remove default mobile tap behavior */
+            -webkit-tap-highlight-color: transparent !important;
+            -webkit-touch-callout: none !important;
+            cursor: pointer !important;
+            
+            /* Smooth transitions for feedback */
+            transition: all 0.15s ease !important;
+            
+            /* Make sure it's always clickable */
+            pointer-events: auto !important;
+        }
+        
+        .shop-remove-btn:hover,
+        .shop-remove-btn:focus {
+            background-color: #dc3545 !important;
+            color: white !important;
+            border-color: #dc3545 !important;
+            outline: none !important;
+        }
+        
+        .shop-remove-btn:active {
+            background-color: #dc3545 !important;
+            color: white !important;
+            border-color: #dc3545 !important;
+            transform: scale(0.9) !important;
+        }
+        
+        .shop-remove-btn i {
+            pointer-events: none !important;
+            font-size: 16px !important;
+            font-weight: bold !important;
+        }
+        
+        /* Mobile-specific improvements */
+        @media (max-width: 768px) {
+            .shop-remove-btn {
+                min-width: 56px !important;
+                min-height: 56px !important;
+                padding: 12px !important;
+                margin-left: 12px !important;
+                border-radius: 8px !important;
+            }
+            
+            .shop-remove-btn i {
+                font-size: 18px !important;
+            }
+            
+            /* Add more spacing around touch targets */
+            .d-flex.justify-content-between.align-items-center {
+                padding: 20px 16px !important;
+                margin-bottom: 12px !important;
+                border-radius: 8px !important;
+            }
+            
+            /* Ensure the container doesn't interfere with touch events */
+            .d-flex.justify-content-between.align-items-center > div:last-child {
+                flex-shrink: 0 !important;
+            }
+            
+            /* Make the entire button area more obvious */
+            .shop-remove-btn-container {
+                background-color: rgba(220, 53, 69, 0.1) !important;
+                border-radius: 8px !important;
+                padding: 4px !important;
+            }
+        }
+        
+        /* Ensure parent containers don't block touch events */
+        #shopsContainer {
+            pointer-events: auto !important;
+        }
+        
+        #shopsContainer > div {
+            pointer-events: auto !important;
+        }
+        
+        /* Make sure the button container is properly sized */
+        .shop-remove-btn-container {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            flex-shrink: 0 !important;
+        }
+    </style>
 {% endblock %}
 

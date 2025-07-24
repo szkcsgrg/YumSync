@@ -4,28 +4,160 @@
 {% block title %}YumSync - Initial Setup{% endblock %}
 
 {% block body %}
-<h2>Setup your favourite Shops</h2>
+<div class="container mt-5">
+    {% if step == 'household_choice' %}
+        {# Step 1: Choose household action #}
+        <h2>Welcome to YumSync!</h2>
+        <p>Would you like to create a new household or join an existing one?</p>
+        
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Create New Household</h5>
+                        <p class="card-text">Start fresh with your own household and invite family members later.</p>
+                        <form method="POST" action="{{ path('initial_setup') }}" data-turbo="false">
+                            <input type="hidden" name="action" value="create_household">
+                            <button type="submit" class="btn btn-primary">Create Household</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Join Existing Household</h5>
+                        <p class="card-text">Join a household that someone has already created.</p>
+                        <form method="POST" action="{{ path('initial_setup') }}" data-turbo="false">
+                            <input type="hidden" name="action" value="join_household">
+                            <button type="submit" class="btn btn-success">Join Household</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+    {% elseif step == 'create_household' %}
+        {# Step 2a: Create household form #}
+        <h2>Create Your Household</h2>
+        <p>Give your household a name that family members will recognize.</p>
+        
+        <form method="POST" action="{{ path('initial_setup') }}" data-turbo="false">
+            <input type="hidden" name="action" value="create_household">
+            
+            <div class="mb-3">
+                <label for="household_name" class="form-label">Household Name</label>
+                <input type="text" class="form-control" id="household_name" name="household_name" 
+                       placeholder="e.g., The Smith Family" required>
+                <div class="form-text">Choose a name that all family members will recognize.</div>
+            </div>
+            
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Create Household</button>
+                <a href="{{ path('initial_setup') }}" class="btn btn-secondary">Back</a>
+            </div>
+        </form>
+    
+    {% elseif step == 'join_household' %}
+        {# Step 2b: Join household form #}
+        <h2>Join Existing Household</h2>
+        <p>Enter the household ID that was shared with you.</p>
+        
+        <form method="POST" action="{{ path('initial_setup') }}" data-turbo="false">
+            <input type="hidden" name="action" value="join_household">
+            
+            <div class="mb-3">
+                <label for="household_id" class="form-label">Household ID</label>
+                <input type="text" class="form-control" id="household_id" name="household_id" 
+                       placeholder="Enter the household ID" required>
+                <div class="form-text">Ask the household owner for the household ID.</div>
+            </div>
+            
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-success">Send Join Request</button>
+                <a href="{{ path('initial_setup') }}" class="btn btn-secondary">Back</a>
+            </div>
+        </form>
+    
+    {% elseif step == 'shop_setup' %}
+        {# Step 3: Shop setup (only for household creators) #}
+        <h2>Setup Your Favourite Shops</h2>
+        <p>Add the shops where your household typically goes shopping.</p>
 
-<form method="POST" action="{{ path('initial_setup') }}">
-    <div id="store-fields">
-        <input type="text" name="stores[]" placeholder="Bolt neve" required>
-    </div>
+        <form method="POST" action="{{ path('initial_setup') }}" data-turbo="false">
+            <input type="hidden" name="action" value="setup_shops">
+            
+            <div id="store-fields">
+                <div class="mb-3">
+                    <input type="text" class="form-control" name="stores[]" placeholder="Shop name" required>
+                </div>
+            </div>
 
-    <label for="stores">Add Further:</label>
-    <button type="button" id="add-store">+</button>
-    <br><br>
-    <button type="submit">Done</button>
-</form>
+            <div class="mb-3">
+                <button type="button" id="add-store" class="btn btn-outline-secondary">+ Add Another Shop</button>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Complete Setup</button>
+        </form>
+    
+    {% elseif step == 'complete' %}
+        {# Step 4: Setup complete #}
+        <div class="text-center">
+            <h2>Setup Complete!</h2>
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle"></i>
+                Your household and shops have been set up successfully.
+            </div>
+            <p>You're all ready to start managing your shopping lists with YumSync!</p>
+            <a href="{{ path('application') }}" class="btn btn-primary">Go to Application</a>
+        </div>
+    
+    {% elseif step == 'pending_approval' %}
+        {# Step: Waiting for approval #}
+        <div class="text-center">
+            <h2>Waiting for Approval</h2>
+            <div class="alert alert-warning">
+                <i class="fas fa-hourglass-half"></i>
+                Your request to join household ID <strong>{{ household_id }}</strong> is still pending approval.
+            </div>
+            <p>Unfortunately, you cannot access the application until the household owner approves your request.</p>
+            <p>Please be patient and try logging in again later. The household owner will need to approve your request first.</p>
+            
+            <div class="mt-4">
+                <form method="POST" action="{{ path('initial_setup') }}" class="d-inline" data-turbo="false">
+                    <input type="hidden" name="action" value="cancel_request">
+                    <button type="submit" class="btn btn-warning me-2" 
+                            onclick="return confirm('Are you sure you want to cancel your household join request? You will need to request to join again.')">
+                        Cancel Request
+                    </button>
+                </form>
+                <a href="{{ path('app_login') }}" class="btn btn-secondary">Back to Login</a>
+            </div>
+        </div>
+    {% endif %}
+</div>
 
 <script>
-    document.getElementById('add-store').addEventListener('click', function () {
-        const container = document.getElementById('store-fields');
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.name = 'stores[]';
-        input.placeholder = 'Bolt neve';
-        container.appendChild(document.createElement('br'));
-        container.appendChild(input);
+    // Add shop functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const addStoreBtn = document.getElementById('add-store');
+        if (addStoreBtn) {
+            addStoreBtn.addEventListener('click', function () {
+                const container = document.getElementById('store-fields');
+                const newField = document.createElement('div');
+                newField.className = 'mb-3';
+                
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'form-control';
+                input.name = 'stores[]';
+                input.placeholder = 'Shop name';
+                
+                newField.appendChild(input);
+                container.appendChild(newField);
+            });
+        }
     });
 </script>
 {% endblock %}

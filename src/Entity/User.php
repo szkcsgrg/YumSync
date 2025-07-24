@@ -33,6 +33,18 @@ class User implements UserInterface
     #[ORM\Column]
     private ?bool $isInitialSetupDone = false;  // Whether user completed initial setup
 
+    #[ORM\Column(length: 10, nullable: true)]
+    private ?string $countryCode = null;  // User's country code (e.g., 'HU', 'US', 'AT')
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $country = null;  // User's country name (e.g., 'Hungary', 'United States')
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $region = null;  // User's region/state (e.g., 'Budapest', 'California')
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $detectedFrom = null;  // How location was detected ('ip', 'google', 'manual')
+
     // Standard getters and setters for User properties
     
     public function getId(): ?int
@@ -94,6 +106,50 @@ class User implements UserInterface
     public function setInitialSetupDone(bool $isInitialSetupDone): static
     {
         $this->isInitialSetupDone = $isInitialSetupDone;
+        return $this;
+    }
+
+    public function getCountryCode(): ?string
+    {
+        return $this->countryCode;
+    }
+
+    public function setCountryCode(?string $countryCode): static
+    {
+        $this->countryCode = $countryCode;
+        return $this;
+    }
+
+    public function getCountry(): ?string
+    {
+        return $this->country;
+    }
+
+    public function setCountry(?string $country): static
+    {
+        $this->country = $country;
+        return $this;
+    }
+
+    public function getRegion(): ?string
+    {
+        return $this->region;
+    }
+
+    public function setRegion(?string $region): static
+    {
+        $this->region = $region;
+        return $this;
+    }
+
+    public function getDetectedFrom(): ?string
+    {
+        return $this->detectedFrom;
+    }
+
+    public function setDetectedFrom(?string $detectedFrom): static
+    {
+        $this->detectedFrom = $detectedFrom;
         return $this;
     }
 

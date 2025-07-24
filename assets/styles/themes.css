@@ -50,7 +50,7 @@
 .navbar .theme-toggle {
   position: static;
   width: auto;
-  height: auto;
+  height: 5em;
   border: none;
   background: transparent;
   font-size: var(--font-large);
@@ -58,4 +58,45 @@
 .navbar .theme-toggle:hover {
   background: transparent;
   color: var(--primary);
+}
+
+/* Modal theming */
+.modal-content {
+  background-color: var(--bg-modal);
+  color: var(--text-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--border-radius);
+  transition: background-color var(--transition-duration) var(--transition-ease), color var(--transition-duration) var(--transition-ease), border-color var(--transition-duration) var(--transition-ease);
+}
+
+.modal-header {
+  background-color: var(--bg-header);
+  border-bottom: 1px solid var(--border-primary);
+  color: var(--text-primary);
+}
+
+.modal-body {
+  background-color: var(--bg-modal);
+  color: var(--text-primary);
+}
+
+.modal-footer {
+  background-color: var(--bg-header);
+  border-top: 1px solid var(--border-primary);
+  color: var(--text-primary);
+}
+
+.modal-title {
+  color: var(--text-primary);
+}
+
+/* Ensure bg-light in modals respects theme */
+.modal .bg-light {
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-primary) !important;
+}
+
+/* Text muted in modals */
+.modal .text-muted {
+  color: var(--text-muted) !important;
 }

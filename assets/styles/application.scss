@@ -791,7 +791,7 @@ body.dragging-active {
     
     .form-control {
         font-size: var(--font-small-form-control) !important;
-        padding: 1rem 1.2rem !important;
+        //padding: 1rem 1.2rem !important;
     }
     
     .form-label {
@@ -920,11 +920,13 @@ body.dragging-active {
         //padding: 0.9rem 1.2rem !important;
     }
     
-    .form-control {
+    .form-control, .form-select {
         font-size: var(--font-iphone-form-control) !important;
-        padding: 1.4rem 1.6rem !important;
+        padding: 1rem !important;
     }
-    
+    #addProductButton{
+        padding: 1rem !important;
+    }
     .form-label {
         font-size: var(--font-iphone-form-label) !important;
         font-weight: 700;
@@ -933,6 +935,10 @@ body.dragging-active {
     .btn {
         font-size: var(--font-iphone-button) !important;
         //padding: 1.2rem 1.5rem !important;
+    }
+    #decreaseAmountButton, #increaseAmountButton {
+        font-size: calc(var(--font-iphone-button)*3) !important;
+        padding: 0.8rem 1.2rem !important;
     }
     
     .modal-body {
@@ -943,6 +949,10 @@ body.dragging-active {
         font-size: var(--font-iphone-card-header) !important;
     }
     
+    .input-group{
+        height: 15em;
+    }
+
     .input-group .form-control {
         font-size: var(--font-iphone-form-control) !important;
     }
@@ -1047,7 +1057,8 @@ body.dragging-active {
         padding: var(--mobile-btn-padding-y) var(--mobile-btn-padding-x);
     }
     
-    .input-group {
+    /* Only apply larger font size to modal quantity input group, not main add product input */
+    .modal .input-group:not(.input-group-lg) {
         font-size: var(--font-mobile-form-control);
     }
     

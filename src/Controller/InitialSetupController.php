@@ -5,6 +5,8 @@ namespace App\Controller;
 
 use App\Entity\CreatedShops;
 use App\Entity\User;
+use App\Entity\Household;
+use App\Entity\HouseholdUsers;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -54,54 +56,235 @@ class InitialSetupController extends AbstractController
             return $this->redirectToRoute('application');
         }
 
-        // Handle form submission (POST request)
+        // Handle form submission (POST request) FIRST before checking pending status
         if ($request->isMethod('POST')) {
-            // Get all store names from the form submission
-            // Form field name is 'stores' and it's an array of store names
-            $storeNames = $request->request->all('stores');
-            $shopCounter = 1; // Counter for assigning shop IDs
-
-            // Process each submitted store name
-            foreach ($storeNames as $storeName) {
-                $trimmed = trim($storeName); // Remove whitespace
-                if (!empty($trimmed)) { // Only create shops with non-empty names
-                    // Create new shop entity
-                    $shop = new CreatedShops();
-                    $shop->setShopId($shopCounter++); // Assign incremental ID
-                    $shop->setName($trimmed); // Set store name
-                    $shop->setUserId($userId); // Associate with current user
-
-                    // Mark for database insertion
-                    $em->persist($shop);
-                }
-            }
-
-            // Handle user creation or update
-            if (!$existingUser) {
-                // Create new user record if doesn't exist
-                $newUser = new User();
-                $newUser->setEmail($email);
-                $newUser->setName($name);
-                $newUser->setInitialSetupDone(true); // Mark setup as completed
-                $newUser->setLastlogin((new \DateTime())->format('Y-m-d H:i:s'));
-
-                $em->persist($newUser);
-            } else {
-                // Update existing user to mark setup as completed
-                $existingUser->setInitialSetupDone(true);
-                $existingUser->setLastlogin((new \DateTime())->format('Y-m-d H:i:s'));
-
-                $em->persist($existingUser);
-            }
-
-            // Save all changes to database
-            $em->flush();
-
-            // Show success message to user
-            $this->addFlash('success', 'Initial setup succesfully saved!');
+            $action = $request->request->get('action');
             
-            // Redirect to main application
-            return $this->redirectToRoute('application');
+            if ($action === 'create_household') {
+                // Check if this is the form to show create household form or actually create it
+                $householdName = trim($request->request->get('household_name', ''));
+                
+                if (empty($householdName)) {
+                    // Show create household form
+                    return $this->render('initial_setup/index.html.twig', [
+                        'user' => $googleUser,
+                        'email' => $email,
+                        'name' => $name,
+                        'step' => 'create_household'
+                    ]);
+                }
+                
+                // Actually create the household
+                $householdRepo = $em->getRepository(Household::class);
+                do {
+                    $generatedId = rand(100000, 999999);
+                } while ($householdRepo->findOneBy(['householdID' => $generatedId]));
+                
+                // Create household
+                $household = new Household();
+                $household->setHouseholdID($generatedId);
+                $household->setName($householdName);
+                $household->setOwnerUserId($userId);
+                $em->persist($household);
+                
+                // Add user as owner
+                $householdUser = new HouseholdUsers();
+                $householdUser->setUserId($userId);
+                $householdUser->setHouseholdId($generatedId);
+                $householdUser->setRole('owner');
+                $householdUser->setStatus('approved');
+                $householdUser->setJoinedAt((new \DateTime())->format('Y-m-d H:i:s'));
+                $em->persist($householdUser);
+                
+                // Save and continue to shop setup
+                $em->flush();
+                
+                return $this->render('initial_setup/index.html.twig', [
+                    'user' => $googleUser,
+                    'email' => $email,
+                    'name' => $name,
+                    'step' => 'shop_setup',
+                    'household_id' => $generatedId,
+                    'household_name' => $householdName
+                ]);
+                
+            } elseif ($action === 'join_household') {
+                // Check if this is the form to show join household form or actually join it
+                $householdId = trim($request->request->get('household_id', ''));
+                
+                if (empty($householdId)) {
+                    // Show join household form
+                    return $this->render('initial_setup/index.html.twig', [
+                        'user' => $googleUser,
+                        'email' => $email,
+                        'name' => $name,
+                        'step' => 'join_household'
+                    ]);
+                }
+                
+                // Actually join the household
+                if (!preg_match('/^\d{6}$/', $householdId)) {
+                    $this->addFlash('error', 'Please enter a valid 6-digit household ID');
+                    return $this->render('initial_setup/index.html.twig', [
+                        'user' => $googleUser,
+                        'email' => $email,
+                        'name' => $name,
+                        'step' => 'join_household'
+                    ]);
+                }
+                
+                // Check if household exists
+                $householdRepo = $em->getRepository(Household::class);
+                $household = $householdRepo->findOneBy(['householdID' => (int)$householdId]);
+                
+                if (!$household) {
+                    $this->addFlash('error', 'Household not found. Please check the ID and try again.');
+                    return $this->render('initial_setup/index.html.twig', [
+                        'user' => $googleUser,
+                        'email' => $email,
+                        'name' => $name,
+                        'step' => 'join_household'
+                    ]);
+                }
+                
+                // Check if user is already a member
+                $householdUsersRepo = $em->getRepository(HouseholdUsers::class);
+                $existingMembership = $householdUsersRepo->findOneBy([
+                    'userId' => $userId,
+                    'householdId' => (int)$householdId
+                ]);
+                
+                if ($existingMembership) {
+                    $this->addFlash('error', 'You are already a member of this household');
+                    return $this->render('initial_setup/index.html.twig', [
+                        'user' => $googleUser,
+                        'email' => $email,
+                        'name' => $name,
+                        'step' => 'join_household'
+                    ]);
+                }
+                
+                // Create join request
+                $householdUser = new HouseholdUsers();
+                $householdUser->setUserId($userId);
+                $householdUser->setHouseholdId((int)$householdId);
+                $householdUser->setRole('member');
+                $householdUser->setStatus('pending');
+                $householdUser->setJoinedAt((new \DateTime())->format('Y-m-d H:i:s'));
+                $em->persist($householdUser);
+                
+                // Create user account but DON'T mark setup as complete (they need approval first)
+                if (!$existingUser) {
+                    $newUser = new User();
+                    $newUser->setEmail($email);
+                    $newUser->setName($name);
+                    $newUser->setInitialSetupDone(false); // Keep as false until approved
+                    $newUser->setLastlogin((new \DateTime())->format('Y-m-d H:i:s'));
+                    $em->persist($newUser);
+                } else {
+                    // Don't mark existing user as setup done
+                    $existingUser->setLastlogin((new \DateTime())->format('Y-m-d H:i:s'));
+                    $em->persist($existingUser);
+                }
+                
+                $em->flush();
+                
+                // Add informative flash message and redirect to login
+                $this->addFlash('info', 'Your join request has been sent to the household owner. Please be patient and come back later - all progress will be lost until the owner approves your request. You can log in again once approved.');
+                return $this->redirectToRoute('app_login');
+                
+            } elseif ($action === 'setup_shops') {
+                // Handle shop setup step (only for household creators)
+                $storeNames = $request->request->all('stores');
+                
+                // Get the highest existing shopId across all users
+                $shopsRepo = $em->getRepository(CreatedShops::class);
+                $maxShopId = $shopsRepo->createQueryBuilder('s')
+                    ->select('MAX(s.shopId)')
+                    ->getQuery()
+                    ->getSingleScalarResult();
+                
+                $shopCounter = $maxShopId ? $maxShopId + 1 : 1;
+
+                // Process each submitted store name
+                foreach ($storeNames as $storeName) {
+                    $trimmed = trim($storeName);
+                    if (!empty($trimmed)) {
+                        $shop = new CreatedShops();
+                        $shop->setShopId($shopCounter++);
+                        $shop->setName($trimmed);
+                        $shop->setUserId($userId);
+                        $em->persist($shop);
+                    }
+                }
+
+                // Complete user setup
+                if (!$existingUser) {
+                    $newUser = new User();
+                    $newUser->setEmail($email);
+                    $newUser->setName($name);
+                    $newUser->setInitialSetupDone(true);
+                    $newUser->setLastlogin((new \DateTime())->format('Y-m-d H:i:s'));
+                    $em->persist($newUser);
+                } else {
+                    $existingUser->setInitialSetupDone(true);
+                    $existingUser->setLastlogin((new \DateTime())->format('Y-m-d H:i:s'));
+                    $em->persist($existingUser);
+                }
+
+                $em->flush();
+
+                return $this->render('initial_setup/index.html.twig', [
+                    'user' => $googleUser,
+                    'email' => $email,
+                    'name' => $name,
+                    'step' => 'complete'
+                ]);
+                
+            } elseif ($action === 'cancel_request') {
+                // Cancel pending household join request
+                $householdUsersRepo = $em->getRepository(HouseholdUsers::class);
+                $pendingRequest = $householdUsersRepo->findOneBy([
+                    'userId' => $userId,
+                    'status' => 'pending'
+                ]);
+                
+                if ($pendingRequest) {
+                    // Remove the pending request
+                    $em->remove($pendingRequest);
+                    $em->flush();
+                    
+                    $this->addFlash('success', 'Your household join request has been cancelled.');
+                }
+                
+                // Show the default initial setup page
+                return $this->render('initial_setup/index.html.twig', [
+                    'user' => $googleUser,
+                    'email' => $email,
+                    'name' => $name,
+                    'step' => 'household_choice'
+                ]);
+            }
+        }
+
+        // Check if user has a pending household join request (only for GET requests)
+        if ($existingUser) {
+            $householdUsersRepo = $em->getRepository(HouseholdUsers::class);
+            $pendingRequest = $householdUsersRepo->findOneBy([
+                'userId' => $userId,
+                'status' => 'pending'
+            ]);
+            
+            if ($pendingRequest) {
+                // User has a pending request, show waiting message
+                return $this->render('initial_setup/index.html.twig', [
+                    'user' => $googleUser,
+                    'email' => $email,
+                    'name' => $name,
+                    'step' => 'pending_approval',
+                    'household_id' => $pendingRequest->getHouseholdId()
+                ]);
+            }
         }
 
         // Handle GET request - display the setup form
@@ -109,6 +292,7 @@ class InitialSetupController extends AbstractController
             'user' => $googleUser,    // Pass authenticated user object
             'email' => $email,        // Pass user email
             'name' => $name,          // Pass user display name
+            'step' => 'household_choice'  // Default step for initial page load
         ]);
     }
 }

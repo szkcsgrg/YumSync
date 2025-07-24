@@ -1,0 +1,104 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Farewell - YumSync{% endblock %}
+
+{% block body %}
+    <div class="container-fluid d-flex align-items-center justify-content-center min-vh-100" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <div class="row justify-content-center w-100">
+            <div class="col-md-6 col-lg-5">
+                <div class="card shadow-lg border-0" style="border-radius: 15px;">
+                    <div class="card-body p-5 text-center">
+                        <!-- Sad but hopeful emoji and icon -->
+                        <div class="mb-4">
+                            <i class="fas fa-heart-broken text-muted" style="font-size: 4rem; opacity: 0.7;"></i>
+                        </div>
+                        
+                        <!-- Main heading -->
+                        <h2 class="text-primary mb-3">We're Sorry to See You Go</h2>
+                        
+                        <!-- Emotional message -->
+                        <div class="mb-4">
+                            <p class="text-muted mb-3" style="font-size: 1.1rem;">
+                                Your account has been successfully deleted, and we understand that sometimes 
+                                it's time to move on. 
+                            </p>
+                            <p class="text-muted mb-3">
+                                But remember, <strong>YumSync</strong> will always be here waiting for you 
+                                with open arms whenever you're ready to organize your shopping lists again.
+                            </p>
+                        </div>
+
+                        <!-- Hopeful section -->
+                        <div class="bg-light rounded p-4 mb-4">
+                            <h5 class="text-success mb-3">
+                                <i class="fas fa-door-open me-2"></i>The Door is Always Open
+                            </h5>
+                            <p class="text-muted small mb-0">
+                                Creating a new account takes just a few seconds, and you'll be back to 
+                                organizing your household shopping in no time. We've learned and improved, 
+                                and we'd love to welcome you back!
+                            </p>
+                        </div>
+
+                        <!-- Action buttons -->
+                        <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
+                            <a href="/" class="btn btn-outline-primary">
+                                <i class="fas fa-home me-2"></i>Go to Homepage
+                            </a>
+                            <a href="/initialsetup" class="btn btn-success">
+                                <i class="fas fa-user-plus me-2"></i>Create New Account
+                            </a>
+                        </div>
+
+                        <!-- Footer message -->
+                        <div class="mt-5 pt-4 border-top">
+                            <p class="text-muted small mb-0">
+                                <i class="fas fa-heart text-danger me-1"></i>
+                                Thank you for being part of the YumSync family
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add some custom animations -->
+    <style>
+        .card {
+            animation: fadeInUp 0.8s ease-out;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .btn {
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .fa-heart-broken {
+            animation: heartBeat 2s ease-in-out infinite;
+        }
+        
+        @keyframes heartBeat {
+            0% { transform: scale(1); }
+            14% { transform: scale(1.1); }
+            28% { transform: scale(1); }
+            42% { transform: scale(1.1); }
+            70% { transform: scale(1); }
+        }
+    </style>
+{% endblock %}
